@@ -386,10 +386,12 @@ var ROLES = [
 var ROLE_NAME = {}; ROLES.forEach(function(r){ ROLE_NAME[r[0]] = r[1]; });
 var KEY = 'ffp.v1';
 
-/* ---------- Pro (Gumroad) ---------- */
+/* ---------- Pro (Whop) ---------- */
 var SITE = 'https://aiyoto-myth.github.io/family-formals/';
-var GUMROAD_URL = '';  // checkout moves to Whop (user 11-23); Gumroad draft: crazyoldie.gumroad.com/l/family-formals-pro
-var GUMROAD_PRODUCT_ID = '';
+var CHECKOUT_URL = 'https://whop.com/checkout/plan_GDLyKagMQ2oiF';   // Whop product prod_ufUFnckIeVvR3, $19 one-time; documented to credit ?a=<affiliate>
+var CHECKOUT_REDIRECT_URL = 'https://whop.com/checkout/ch_gywxy4KLpZVlaPx/';  // same plan, sends buyers back to ?bought=1 (used when no affiliate)
+var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';        // our Whop-hosted purchase check
+var APP_KEY = 'family-formals';
 var PRICE = '$19';
 var PRO = {key:'', studio:'', logo:''};
 function loadPro(){ try{ var t = localStorage.getItem('ffp.pro'); if(t) PRO = Object.assign(PRO, JSON.parse(t)); }catch(e){} }
@@ -402,13 +404,12 @@ function affCode(){
   try{ if(a) localStorage.setItem('ffp.aff', a); else a = localStorage.getItem('ffp.aff') || ''; }catch(e){}
   return a;
 }
-function buyUrl(){ if(!GUMROAD_URL) return ''; var a = affCode(); return a ? GUMROAD_URL + (GUMROAD_URL.indexOf('?')>=0?'&':'?') + 'affiliate_id=' + encodeURIComponent(a) : GUMROAD_URL; }
-function verifyLicense(key){
-  var body = new URLSearchParams({product_id: GUMROAD_PRODUCT_ID, license_key: key, increment_uses_count: 'false'});
-  return fetch('https://api.gumroad.com/v2/licenses/verify', {method:'POST', body: body}).then(function(r){ return r.json(); }).then(function(j){
-    if(j && j.success && j.purchase && !j.purchase.refunded && !j.purchase.disputed && !j.purchase.chargebacked) return true;
-    return false;
-  });
+/* Whop referral links use ?a=<affiliate username>; we pass it straight through to checkout. */
+function buyUrl(){ var a = affCode(); return a ? CHECKOUT_URL + '?a=' + encodeURIComponent(a) : CHECKOUT_REDIRECT_URL; }
+function verifyLicense(email){
+  return fetch(VERIFY_URL, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({app: APP_KEY, email: email})})
+    .then(function(r){ return r.json(); })
+    .then(function(j){ if(j && j.ok) return !!j.valid; throw new Error('check failed'); });
 }
 /* GoatCounter: set GC_CODE once the account exists; until then track() does nothing */
 var GC_CODE = '';
@@ -790,7 +791,7 @@ function renderPro(){
     h += '<ul class="feat"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name for every couple, so they fill in their family before the day</li><li>Every wedding saved on this device, one click to switch</li><li>No "Made with" line on anything you print or copy</li></ul>'
       + (url ? '<p style="margin:22px 0 6px"><a class="btn primary" data-buy="1" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro, '+PRICE+' once</a></p><p style="margin:0;font-size:15px">One payment, no subscription. 30-day refund: just reply to your receipt.</p>'
              : '<p class="notice" style="margin-top:20px">Pro goes on sale in a few days. Everything else works now.</p>')
-      + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Paste your license key</label><input type="text" id="licKey" autocomplete="off" spellcheck="false"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
+      + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Enter the email you paid with</label><input type="email" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@studio.com"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
       + '<p class="note" id="licNote" aria-live="polite"></p>';
   } else {
     var w = getWeddings();
@@ -914,13 +915,12 @@ document.addEventListener('click', function(e){
   if(t.id==='btnLic'){
     var k = $('licKey').value.trim();
     if(!k){ $('licKey').focus(); return; }
-    if(!GUMROAD_PRODUCT_ID){ $('licNote').textContent = 'Pro is not on sale yet.'; return; }
     $('licNote').textContent = 'Checking…'; t.disabled = true;
-    verifyLicense(k).then(function(ok){
+    verifyLicense(k.toLowerCase()).then(function(ok){
       t.disabled = false;
-      if(ok){ PRO.key = k; savePro(); track('pro-unlocked'); renderAll(); say('Pro unlocked'); }
-      else $('licNote').textContent = 'That key was not accepted. Check it was copied in full, or reply to your Gumroad receipt for help.';
-    }, function(){ t.disabled = false; $('licNote').textContent = 'Could not reach Gumroad to check the key. Check your internet connection and try again.'; });
+      if(ok){ PRO.key = k.toLowerCase(); savePro(); track('pro-unlocked'); renderAll(); say('Pro unlocked'); }
+      else $('licNote').textContent = 'No Pro purchase found for that email. Use the email from your Whop receipt; if it still fails, reply to the receipt and we will sort it out.';
+    }, function(){ t.disabled = false; $('licNote').textContent = 'Could not check right now. Check your internet connection and try again in a minute.'; });
     return;
   }
   if(t.id==='btnLogoDel'){ PRO.logo = ''; savePro(); renderAll(); return; }
@@ -967,6 +967,14 @@ load(); loadPro(); affCode();
 if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://'+GC_CODE+'.goatcounter.com/count'); document.head.appendChild(gs); }
 (function(){
   var q = new URLSearchParams(location.search);
+  if(q.get('bought')==='1' && !isPro()){
+    setTimeout(function(){
+      var ln = $('licNote'), lk = $('licKey');
+      if(ln) ln.textContent = 'Thanks for buying Pro. Enter the email you just paid with and press Unlock Pro.';
+      var ps = $('proSection'); if(ps) ps.scrollIntoView();
+      if(lk) lk.focus();
+    }, 400);
+  }
   if(!isPro() && (q.get('for')==='pro' || q.get('a'))){
     var url = buyUrl();
     $('proHero').hidden = false;

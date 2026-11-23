@@ -3,8 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Family Formals Planner</title>
-<meta name="description" content="Enter the family once. Get the best order for wedding family photos, who to call next, and who is free to go. Free, no sign-up, works on your phone.">
+<title>Wedding Family Photo List &amp; Order Planner (Free) | Family Formals Planner</title>
+<meta name="description" content="Free wedding family photo list planner. Enter the family once and get the best order for the family formals, who to call next, and who is free to go. Handles divorced parents. No sign-up.">
+<link rel="canonical" href="https://aiyoto-myth.github.io/family-formals/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Wedding Family Photo List &amp; Order Planner (Free)">
+<meta property="og:description" content="Enter the family once. Get the shot order, call cards for whoever calls names, and who is free to go. Keeps divorced parents apart.">
+<meta property="og:url" content="https://aiyoto-myth.github.io/family-formals/">
+<meta property="og:image" content="https://aiyoto-myth.github.io/family-formals/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
   --bg:#faf8f5; --card:#ffffff; --ink:#1f1d1a; --muted:#5f5a52; --line:#ddd6ca;
@@ -107,8 +114,12 @@ footer{color:var(--muted);font-size:14px;margin-top:30px}
 <body>
 <main>
   <header>
-    <h1>Family Formals Planner</h1>
+    <h1>Wedding family photo list &amp; order planner</h1>
     <p class="tag">Enter the family once. Get the best order for the family photos, who to call next, and who is free to go.</p>
+    <div id="proHero" class="notice" hidden>
+      <p style="margin:0 0 6px"><b>For wedding photographers:</b> send the couple one link. Get the shot order, the call cards, and who can leave, with your studio logo on them.</p>
+      <p style="margin:0" id="proHeroCta"></p>
+    </div>
     <div class="toolbar">
       <button type="button" id="btnExample">Try it with an example family</button>
       <button type="button" id="btnClear">Start over</button>
@@ -183,6 +194,7 @@ footer{color:var(--muted);font-size:14px;margin-top:30px}
       <button type="button" id="btnCopyText">Copy as text</button>
     </div>
     <p class="hint" id="shareNote" aria-live="polite"></p>
+    <p class="notice" id="proNudge" hidden></p>
   </section>
 
   <section class="step" aria-labelledby="h5s" id="proSection">
@@ -192,6 +204,22 @@ footer{color:var(--muted);font-size:14px;margin-top:30px}
 
   <div id="printSheet"></div>
   <p class="sr" id="live" aria-live="polite"></p>
+
+  <section class="step" aria-labelledby="faqh" id="faq">
+    <h2 id="faqh">Wedding family photos: common questions</h2>
+    <h3>Who is included in the family photos at a wedding?</h3>
+    <p>Most couples photograph each side separately: first the whole extended family on one side (grandparents, aunts, uncles, cousins), then the immediate family (parents, brothers and sisters, their partners and kids), then just the parents. Then the same for the other side, and one photo with both sets of parents together. This planner suggests exactly that list from the people you enter, and you can untick or add any photo.</p>
+    <h3>What order should wedding family photos go in?</h3>
+    <p>Start with the biggest group and take people away, so each person is done as early as possible and can go and enjoy the party. Finish one family before starting the other, so people are not called back. Grandparents, small children and anyone leaving early should be finished first. The planner works this order out for you and shows, for every photo, who steps in, who steps out and who is free to go.</p>
+    <h3>How long do wedding family photos take?</h3>
+    <p>Plan about one to two minutes per photo once everyone is there. Fifteen photos take roughly 20 to 30 minutes. Set your start time and minutes per photo in the run sheet and the planner shows when you will be done.</p>
+    <h3>How do you handle divorced parents in wedding photos?</h3>
+    <p>Add both parents, then add them under "Keep apart". The planner never puts them in the same photo; every group they would both be in is split into one photo with each of them, and a new partner can stand with the parent they came with.</p>
+    <h3>Who should call out names during family photos?</h3>
+    <p>Pick one relative who knows everyone on each side and give them the printed call cards. Each card says which photo is next, who steps in, who steps out and who can leave, so the photographer does not have to read names off a list.</p>
+    <h3>Is it free?</h3>
+    <p>Yes, for couples and photographers. Nothing is uploaded and there is no sign-up: your list stays on your device, and the share link carries the list inside the link. Photographers who use it at every wedding can get Pro for their studio logo on the cards, a link for each couple and saved weddings.</p>
+  </section>
 
   <footer>
     The order is worked out so people can leave as early as possible, people who need to go first are done first, and as few people as possible walk in and out between photos. You can still move any photo up or down.
@@ -241,6 +269,9 @@ function verifyLicense(key){
     return false;
   });
 }
+/* GoatCounter: set GC_CODE once the account exists; until then track() does nothing */
+var GC_CODE = '';
+function track(name){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true}); }catch(e){} }
 function getWeddings(){ try{ return JSON.parse(localStorage.getItem('ffp.weddings')||'[]'); }catch(e){ return []; } }
 function setWeddings(w){ try{ localStorage.setItem('ffp.weddings', JSON.stringify(w)); return true; }catch(e){ return false; } }
 
@@ -531,7 +562,7 @@ function renderSheet(){
   if(isPro() && (PRO.logo || PRO.studio)) brand = '<div style="display:flex;align-items:center;gap:12px;margin:0 0 8px">' + (PRO.logo ? '<img src="'+PRO.logo+'" alt="" style="max-height:60px;max-width:200px">' : '') + (PRO.studio ? '<b style="font-size:14pt">'+esc(PRO.studio)+'</b>' : '') + '</div>';
   $('printSheet').innerHTML = brand + '<h1 style="font-size:20pt;margin:0 0 6px">Family photos \u00b7 '+esc(nameA())+' &amp; '+esc(nameB())+'</h1>'
     + '<p style="margin:0 0 10px">'+rows.length+' photos \u00b7 start '+clock(0)+' \u00b7 done about '+clock(rows.length)+'</p>' + cards
-    + (isPro() ? '' : '<p style="margin-top:10px;font-size:10pt">Made with Family Formals Planner \u00b7 free at '+SITE+'</p>');
+    + (isPro() ? '' : '<p style="margin-top:10px;font-size:10pt">Made with Family Formals Planner, free at '+SITE+' \u00b7 Photographers: put your studio logo on these cards at '+SITE+'?for=pro</p>');
 }
 
 function renderAll(){
@@ -549,7 +580,7 @@ function renderPro(){
     var url = buyUrl();
     h += '<p class="hint">Everything above is free, for couples and photographers. Pro is for photographers who use it at every wedding:</p>'
       + '<ul class="hint" style="margin-top:0"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name to send to each couple, so they fill in their family before the day</li><li>Save every wedding on this device and switch between them</li><li>No "Made with" line on what you print or copy</li></ul>'
-      + (url ? '<p><a class="primary" style="display:inline-block;padding:10px 16px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro for '+PRICE+', once</a></p>' : '<p class="hint"><b>Pro is coming soon.</b></p>')
+      + (url ? '<p><a class="primary" style="display:inline-block;padding:10px 16px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none" href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">Get Pro for '+PRICE+', once</a></p><p class="hint">One payment, no subscription. 30-day refund: just reply to your receipt.</p>' : '<p class="hint"><b>Pro is coming soon.</b></p>')
       + '<div class="row"><div><label for="licKey">Already bought? Paste your license key</label><input type="text" id="licKey" autocomplete="off" spellcheck="false"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
       + '<p class="hint" id="licNote" aria-live="polite"></p>';
   } else {
@@ -560,6 +591,7 @@ function renderPro(){
       + (PRO.logo ? '<p><img src="'+PRO.logo+'" alt="Your logo" style="max-height:48px;max-width:180px;vertical-align:middle"> <button type="button" class="small" id="btnLogoDel">Remove logo</button></p>' : '')
       + '<div class="toolbar"><button type="button" class="primary" id="btnClientLink">Copy a blank link for your couple</button><button type="button" id="btnSaveW">Save this wedding</button><button type="button" id="btnNewW">New wedding</button></div>'
       + '<p class="hint" id="proNote" aria-live="polite"></p>'
+      + '<p class="hint">Know other photographers? Get your own link and earn 50% of every sale: <a href="mailto:sam@samsbench.com?subject=Family%20Formals%20Planner%20affiliate%20link">email us</a>.</p>'
       + (w.length ? '<h3>Saved weddings</h3><ul class="people">' + w.map(function(x,i){ return '<li><span class="who">'+esc(x.title)+'<small>saved '+esc(x.saved)+'</small></span><button type="button" class="small" data-openw="'+i+'">Open</button><button type="button" class="small" data-delw="'+i+'" aria-label="Delete '+esc(x.title)+'">Delete</button></li>'; }).join('') + '</ul>' : '');
   }
   $('proBody').innerHTML = h;
@@ -573,6 +605,7 @@ document.addEventListener('click', function(e){
   if(d.add){
     var s = d.add, nm = $('nm_'+s).value.trim();
     if(!nm){ $('nm_'+s).focus(); say('Type a name first'); return; }
+    if(!S.people.length) track('tool-start');
     S.people.push({id:uid('p'), name:nm, side:s, role:$('rl_'+s).value, first:$('fs_'+s).checked});
     changed(true); $('nm_'+s).focus(); say(nm+' added'); return;
   }
@@ -609,7 +642,7 @@ $('btnApart').addEventListener('click', function(){
   if(!S.apart.some(function(pr){ return (pr[0]===a&&pr[1]===b)||(pr[0]===b&&pr[1]===a); })) S.apart.push([a,b]);
   changed(true); say(pname(a)+' and '+pname(b)+' will be kept apart');
 });
-$('btnOrder').addEventListener('click', function(){ optimize(); save(); renderShots(); renderSheet(); say('Photos put in the best order'); });
+$('btnOrder').addEventListener('click', function(){ track('order-made'); optimize(); save(); renderShots(); renderSheet(); say('Photos put in the best order'); });
 $('btnRebuild').addEventListener('click', function(){ S.disabled = {}; S.known = {}; S.shots = S.shots.filter(function(s){ return s.custom; }); changed(true); say('Photo list suggested again'); });
 $('btnCustom').addEventListener('click', function(){
   var m = Array.prototype.slice.call($('customMembers').querySelectorAll('input:checked')).map(function(x){ return x.value; });
@@ -619,10 +652,17 @@ $('btnCustom').addEventListener('click', function(){
   S.shots.push({id:uid('c'), label:label, members:m, a:a, b:b, custom:true});
   $('customLabel').value=''; changed(false); say('Photo added');
 });
-$('btnPrint').addEventListener('click', function(){ renderSheet(); window.print(); });
+function nudge(msg){
+  if(isPro()) return;
+  track('pro-view');
+  var url = buyUrl(), n = $('proNudge');
+  n.hidden = false;
+  n.innerHTML = '<b>Photographers:</b> ' + esc(msg) + ' <a href="#proSection">See Pro</a>' + (url ? ' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">'+PRICE+' once</a>' : '');
+}
+$('btnPrint').addEventListener('click', function(){ renderSheet(); track('export-print'); window.print(); nudge('put your studio logo on these cards and drop the "Made with" line.'); });
 $('btnShare').addEventListener('click', function(){
   shareLink().then(function(url){
-    var done = function(){ $('shareNote').textContent = 'Link copied. Anyone who opens it sees this exact list (nothing is uploaded; the list lives inside the link).'; };
+    var done = function(){ $('shareNote').textContent = 'Link copied. Anyone who opens it sees this exact list (nothing is uploaded; the list lives inside the link).'; track('export-share'); nudge('send every couple a link with your studio name, and keep every wedding saved.'); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function(){ prompt('Copy this link:', url); });
     else prompt('Copy this link:', url);
   });
@@ -635,7 +675,7 @@ $('btnCopyText').addEventListener('click', function(){
     if(r.out.length) txt += '  Step out: '+names(r.out)+'\n';
     if(r.free.length) txt += '  Free to go: '+names(r.free)+'\n';
   });
-  if(!isPro()) txt += '\nMade with Family Formals Planner - free at '+SITE+'\n';
+  if(!isPro()) txt += '\nMade with Family Formals Planner, free at '+SITE+'\nPhotographers: put your studio logo on these cards: '+SITE+'?for=pro\n';
   var ok = function(){ $('shareNote').textContent = 'Run sheet copied as text.'; };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, function(){ prompt('Copy:', txt); }); else prompt('Copy:', txt);
 });
@@ -653,7 +693,7 @@ $('btnExample').addEventListener('click', function(){
   P('Diane (mom)','b','parent'); P('Paul (dad)','b','parent'); P('Grandpa Lee','b','grandparent',true);
   P('Chris (brother)','b','sibling'); P('Jordan (Chris\'s partner)','b','sibPartner'); P('Cousin Nina','b','cousin'); P('Cousin Leo','b','cousin');
   S.apart = [[carol,rick],[carol,linda]];
-  changed(true); say('Example family loaded');
+  track('example'); changed(true); say('Example family loaded');
 });
 
 /* Pro events */
@@ -670,7 +710,7 @@ document.addEventListener('click', function(e){
     $('licNote').textContent = 'Checking…'; t.disabled = true;
     verifyLicense(k).then(function(ok){
       t.disabled = false;
-      if(ok){ PRO.key = k; savePro(); renderAll(); say('Pro unlocked'); }
+      if(ok){ PRO.key = k; savePro(); track('pro-unlocked'); renderAll(); say('Pro unlocked'); }
       else $('licNote').textContent = 'That key was not accepted. Check it was copied in full, or reply to your Gumroad receipt for help.';
     }, function(){ t.disabled = false; $('licNote').textContent = 'Could not reach Gumroad to check the key. Check your internet connection and try again.'; });
     return;
@@ -716,6 +756,20 @@ document.addEventListener('change', function(e){
 
 /* ---------- boot ---------- */
 load(); loadPro(); affCode();
+if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://'+GC_CODE+'.goatcounter.com/count'); document.head.appendChild(gs); }
+(function(){
+  var q = new URLSearchParams(location.search);
+  if(!isPro() && (q.get('for')==='pro' || q.get('a'))){
+    var url = buyUrl();
+    $('proHero').hidden = false;
+    $('proHeroCta').innerHTML = '<button type="button" id="btnHeroExample" class="primary">See it with an example family</button> '
+      + (url ? '<a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">Get Pro, '+PRICE+' once</a>' : '<a href="#proSection">About Pro</a>');
+  }
+})();
+document.addEventListener('click', function(e){
+  var a = e.target.closest('a[data-buy]'); if(a) track('buy-click');
+  if(e.target.id==='btnHeroExample') $('btnExample').click();
+});
 readHash().then(function(o){
   if(o && o.v===1){
     S = Object.assign(blank(), o); save();

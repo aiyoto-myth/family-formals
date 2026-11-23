@@ -970,8 +970,7 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
   if(!isPro() && (q.get('for')==='pro' || q.get('a'))){
     var url = buyUrl();
     $('proHero').hidden = false;
-    $('proHeroCta').innerHTML = '<button type="button" id="btnHeroExample" class="primary">See it with an example family</button> '
-      + (url ? '<a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">Get Pro, '+PRICE+' once</a>' : '<a href="#proSection">About Pro</a>');
+    $('proHeroCta').innerHTML = (url ?'<a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">Get Pro, '+PRICE+' once</a>' : '<a href="#proSection">About Pro</a>');
   }
 })();
 document.addEventListener('click', function(e){

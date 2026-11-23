@@ -421,8 +421,8 @@ function verifyLicense(email){
     .then(function(r){ return r.json(); })
     .then(function(j){ if(j && j.ok) return !!j.valid; throw new Error('check failed'); });
 }
-/* GoatCounter: set GC_CODE once the account exists; until then track() does nothing */
-var GC_CODE = '';
+/* GoatCounter (account created 11-23, login in ~/.secrets/goatcounter.txt on the server). count.js sends path+query, never the #hash, so family names in share links stay private. */
+var GC_CODE = 'familyformals';
 function track(name){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true}); }catch(e){} }
 function getWeddings(){ try{ return JSON.parse(localStorage.getItem('ffp.weddings')||'[]'); }catch(e){ return []; } }
 function setWeddings(w){ try{ localStorage.setItem('ffp.weddings', JSON.stringify(w)); return true; }catch(e){ return false; } }

@@ -406,6 +406,16 @@ function affCode(){
 }
 /* Whop referral links use ?a=<affiliate username>; we pass it straight through to checkout. */
 function buyUrl(){ var a = affCode(); return a ? CHECKOUT_URL + '?a=' + encodeURIComponent(a) : CHECKOUT_REDIRECT_URL; }
+/* Gift codes for creators: only SHA-256 fingerprints live here; the codes themselves are in outreach/gift_codes.json (not published). */
+var GIFT_SHA256 = ['daba0bd853dece12cc1046b9f91647a1d14007f9ec1257ab6abc56dd39fb191c','0ee381ad0acca5ee196c301725abc049393353b0f0dfac821b8ef8add1b9f4ec','5502108c079b8f20f8aa17fa1daa314fc87202ba408fec951b977fd20714cd8c','679b5b205badbfe53833132be0b45c26b37128802741c38ef10e9da26cc88d8f','44cf3c2dbe7e1cda7e1404df25e91e809e99bd622820d2ddcd5dad346652eefa'];
+function checkGift(code){
+  var c = String(code||'').toUpperCase().replace(/\s+/g,'');
+  if(!window.crypto || !crypto.subtle) return Promise.resolve(false);
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(c)).then(function(buf){
+    var hex = Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0'+b.toString(16)).slice(-2); }).join('');
+    return GIFT_SHA256.indexOf(hex) >= 0;
+  });
+}
 function verifyLicense(email){
   return fetch(VERIFY_URL, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({app: APP_KEY, email: email})})
     .then(function(r){ return r.json(); })
@@ -791,7 +801,7 @@ function renderPro(){
     h += '<ul class="feat"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name for every couple, so they fill in their family before the day</li><li>Every wedding saved on this device, one click to switch</li><li>No "Made with" line on anything you print or copy</li></ul>'
       + (url ? '<p style="margin:22px 0 6px"><a class="btn primary" data-buy="1" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro, '+PRICE+' once</a></p><p style="margin:0;font-size:15px">One payment, no subscription. 30-day refund: just reply to your receipt.</p>'
              : '<p class="notice" style="margin-top:20px">Pro goes on sale in a few days. Everything else works now.</p>')
-      + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Enter the email you paid with</label><input type="email" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@studio.com"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
+      + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Enter the email you paid with, or your gift code</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@studio.com or GIFT-CODE"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
       + '<p class="note" id="licNote" aria-live="polite"></p>';
   } else {
     var w = getWeddings();
@@ -916,6 +926,14 @@ document.addEventListener('click', function(e){
     var k = $('licKey').value.trim();
     if(!k){ $('licKey').focus(); return; }
     $('licNote').textContent = 'Checking…'; t.disabled = true;
+    if(k.indexOf('@') < 0){
+      checkGift(k).then(function(ok){
+        t.disabled = false;
+        if(ok){ PRO.key = 'gift:' + k.toUpperCase().replace(/\s+/g,''); savePro(); track('pro-unlocked-gift'); renderAll(); say('Pro unlocked'); }
+        else $('licNote').textContent = 'That gift code was not recognised. Check the spelling, or enter the email you paid with.';
+      });
+      return;
+    }
     verifyLicense(k.toLowerCase()).then(function(ok){
       t.disabled = false;
       if(ok){ PRO.key = k.toLowerCase(); savePro(); track('pro-unlocked'); renderAll(); say('Pro unlocked'); }

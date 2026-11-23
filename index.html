@@ -116,6 +116,7 @@ footer{color:var(--muted);font-size:14px;margin-top:30px}
     <p class="hint">Free. No sign-up. Everything stays on this device until you share a link.</p>
   </header>
 
+  <div id="studioNote" class="notice" hidden></div>
   <div id="loadedNote" class="notice" hidden></div>
 
   <section class="step" aria-labelledby="h1s">
@@ -184,6 +185,11 @@ footer{color:var(--muted);font-size:14px;margin-top:30px}
     <p class="hint" id="shareNote" aria-live="polite"></p>
   </section>
 
+  <section class="step" aria-labelledby="h5s" id="proSection">
+    <h2 id="h5s">For photographers: Pro</h2>
+    <div id="proBody"></div>
+  </section>
+
   <div id="printSheet"></div>
   <p class="sr" id="live" aria-live="polite"></p>
 
@@ -211,7 +217,34 @@ var ROLES = [
 var ROLE_NAME = {}; ROLES.forEach(function(r){ ROLE_NAME[r[0]] = r[1]; });
 var KEY = 'ffp.v1';
 
-function blank(){ return {v:1, a:'', b:'', people:[], apart:[], shots:[], disabled:{}, known:{}, start:'16:00', per:1.5, seq:1}; }
+/* ---------- Pro (Gumroad) ---------- */
+var SITE = 'https://aiyoto-myth.github.io/family-formals/';
+var GUMROAD_URL = '';         // product page, filled in once the product exists
+var GUMROAD_PRODUCT_ID = '';  // for license checks
+var PRICE = '$19';
+var PRO = {key:'', studio:'', logo:''};
+function loadPro(){ try{ var t = localStorage.getItem('ffp.pro'); if(t) PRO = Object.assign(PRO, JSON.parse(t)); }catch(e){} }
+function savePro(){ try{ localStorage.setItem('ffp.pro', JSON.stringify(PRO)); }catch(e){} }
+function isPro(){ return !!PRO.key; }
+function affCode(){
+  var a = '';
+  try{ a = new URLSearchParams(location.search).get('a') || ''; }catch(e){}
+  a = a.replace(/[^A-Za-z0-9_-]/g,'').slice(0,40);
+  try{ if(a) localStorage.setItem('ffp.aff', a); else a = localStorage.getItem('ffp.aff') || ''; }catch(e){}
+  return a;
+}
+function buyUrl(){ if(!GUMROAD_URL) return ''; var a = affCode(); return a ? GUMROAD_URL + (GUMROAD_URL.indexOf('?')>=0?'&':'?') + 'affiliate_id=' + encodeURIComponent(a) : GUMROAD_URL; }
+function verifyLicense(key){
+  var body = new URLSearchParams({product_id: GUMROAD_PRODUCT_ID, license_key: key, increment_uses_count: 'false'});
+  return fetch('https://api.gumroad.com/v2/licenses/verify', {method:'POST', body: body}).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.success && j.purchase && !j.purchase.refunded && !j.purchase.disputed && !j.purchase.chargebacked) return true;
+    return false;
+  });
+}
+function getWeddings(){ try{ return JSON.parse(localStorage.getItem('ffp.weddings')||'[]'); }catch(e){ return []; } }
+function setWeddings(w){ try{ localStorage.setItem('ffp.weddings', JSON.stringify(w)); return true; }catch(e){ return false; } }
+
+function blank(){ return {v:1, a:'', b:'', people:[], apart:[], shots:[], disabled:{}, known:{}, start:'16:00', per:1.5, seq:1, studio:''}; }
 var S = blank();
 
 function uid(p){ S.seq = (S.seq||1) + 1; return p + S.seq.toString(36); }
@@ -394,9 +427,11 @@ function names(list){ return list.map(pname).join(', '); }
 /* ---------- share link ---------- */
 function b64u(bytes){ var s=''; for(var i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
 function unb64u(str){ str = str.replace(/-/g,'+').replace(/_/g,'/'); while(str.length%4) str+='='; var s = atob(str), b = new Uint8Array(s.length); for(var i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; }
-function packState(){ return JSON.stringify({v:1,a:S.a,b:S.b,people:S.people,apart:S.apart,shots:S.shots,disabled:S.disabled,known:S.known,start:S.start,per:S.per,seq:S.seq}); }
-function shareLink(){
-  var json = packState(), base = location.href.split('#')[0];
+function studioName(){ return (isPro() && PRO.studio) ? PRO.studio : (S.studio || ''); }
+function packState(){ return JSON.stringify({v:1,a:S.a,b:S.b,people:S.people,apart:S.apart,shots:S.shots,disabled:S.disabled,known:S.known,start:S.start,per:S.per,seq:S.seq,studio:studioName()}); }
+function shareLink(json){
+  json = json || packState();
+  var aff = affCode(), base = location.href.split('#')[0].split('?')[0] + (aff ? '?a=' + encodeURIComponent(aff) : '');
   if(window.CompressionStream){
     var cs = new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'));
     return new Response(cs).arrayBuffer().then(function(buf){ return base + '#z=' + b64u(new Uint8Array(buf)); });
@@ -492,14 +527,42 @@ function renderSheet(){
       + '</div>';
   }).join('');
   $('sheet').innerHTML = cards;
-  $('printSheet').innerHTML = '<h1 style="font-size:20pt;margin:0 0 6px">Family photos \u00b7 '+esc(nameA())+' &amp; '+esc(nameB())+'</h1>'
-    + '<p style="margin:0 0 10px">'+rows.length+' photos \u00b7 start '+clock(0)+' \u00b7 done about '+clock(rows.length)+'</p>' + cards;
+  var brand = '';
+  if(isPro() && (PRO.logo || PRO.studio)) brand = '<div style="display:flex;align-items:center;gap:12px;margin:0 0 8px">' + (PRO.logo ? '<img src="'+PRO.logo+'" alt="" style="max-height:60px;max-width:200px">' : '') + (PRO.studio ? '<b style="font-size:14pt">'+esc(PRO.studio)+'</b>' : '') + '</div>';
+  $('printSheet').innerHTML = brand + '<h1 style="font-size:20pt;margin:0 0 6px">Family photos \u00b7 '+esc(nameA())+' &amp; '+esc(nameB())+'</h1>'
+    + '<p style="margin:0 0 10px">'+rows.length+' photos \u00b7 start '+clock(0)+' \u00b7 done about '+clock(rows.length)+'</p>' + cards
+    + (isPro() ? '' : '<p style="margin-top:10px;font-size:10pt">Made with Family Formals Planner \u00b7 free at '+SITE+'</p>');
 }
 
 function renderAll(){
   $('nameA').value = S.a; $('nameB').value = S.b;
   $('startTime').value = S.start || '16:00'; $('perShot').value = S.per || 1.5;
-  renderSides(); renderApart(); renderShots(); renderSheet();
+  renderSides(); renderApart(); renderShots(); renderSheet(); renderPro();
+  var st = $('studioNote');
+  if(S.studio && !isPro()){ st.hidden = false; st.textContent = S.studio + ' asked you to fill this in. Add your family below, then press "Copy share link" at the bottom and send the link back to them.'; }
+  else st.hidden = true;
+}
+
+function renderPro(){
+  var h = '';
+  if(!isPro()){
+    var url = buyUrl();
+    h += '<p class="hint">Everything above is free, for couples and photographers. Pro is for photographers who use it at every wedding:</p>'
+      + '<ul class="hint" style="margin-top:0"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name to send to each couple, so they fill in their family before the day</li><li>Save every wedding on this device and switch between them</li><li>No "Made with" line on what you print or copy</li></ul>'
+      + (url ? '<p><a class="primary" style="display:inline-block;padding:10px 16px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro for '+PRICE+', once</a></p>' : '<p class="hint"><b>Pro is coming soon.</b></p>')
+      + '<div class="row"><div><label for="licKey">Already bought? Paste your license key</label><input type="text" id="licKey" autocomplete="off" spellcheck="false"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
+      + '<p class="hint" id="licNote" aria-live="polite"></p>';
+  } else {
+    var w = getWeddings();
+    h += '<p class="hint">Pro is unlocked on this device. Thank you.</p>'
+      + '<div class="row"><div><label for="studioIn">Studio name</label><input type="text" id="studioIn" value="'+esc(PRO.studio)+'" autocomplete="off"></div>'
+      + '<div><label for="logoIn">Logo (shown on printed cards)</label><input type="file" id="logoIn" accept="image/*"></div></div>'
+      + (PRO.logo ? '<p><img src="'+PRO.logo+'" alt="Your logo" style="max-height:48px;max-width:180px;vertical-align:middle"> <button type="button" class="small" id="btnLogoDel">Remove logo</button></p>' : '')
+      + '<div class="toolbar"><button type="button" class="primary" id="btnClientLink">Copy a blank link for your couple</button><button type="button" id="btnSaveW">Save this wedding</button><button type="button" id="btnNewW">New wedding</button></div>'
+      + '<p class="hint" id="proNote" aria-live="polite"></p>'
+      + (w.length ? '<h3>Saved weddings</h3><ul class="people">' + w.map(function(x,i){ return '<li><span class="who">'+esc(x.title)+'<small>saved '+esc(x.saved)+'</small></span><button type="button" class="small" data-openw="'+i+'">Open</button><button type="button" class="small" data-delw="'+i+'" aria-label="Delete '+esc(x.title)+'">Delete</button></li>'; }).join('') + '</ul>' : '');
+  }
+  $('proBody').innerHTML = h;
 }
 function changed(reorder){ rebuild(); if(reorder) optimize(); save(); renderAll(); }
 
@@ -572,16 +635,17 @@ $('btnCopyText').addEventListener('click', function(){
     if(r.out.length) txt += '  Step out: '+names(r.out)+'\n';
     if(r.free.length) txt += '  Free to go: '+names(r.free)+'\n';
   });
+  if(!isPro()) txt += '\nMade with Family Formals Planner - free at '+SITE+'\n';
   var ok = function(){ $('shareNote').textContent = 'Run sheet copied as text.'; };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, function(){ prompt('Copy:', txt); }); else prompt('Copy:', txt);
 });
 $('btnClear').addEventListener('click', function(){
   if(!confirm('Clear everything and start over?')) return;
-  S = blank(); history.replaceState(null,'',location.href.split('#')[0]); save(); renderAll(); say('Cleared');
+  var keepStudio = S.studio; S = blank(); S.studio = keepStudio; history.replaceState(null,'',location.href.split('#')[0]); save(); renderAll(); say('Cleared');
 });
 $('btnExample').addEventListener('click', function(){
   if(S.people.length && !confirm('Replace what you have with the example family?')) return;
-  S = blank(); S.a = 'Emma'; S.b = 'James';
+  var keepSt = S.studio; S = blank(); S.studio = keepSt; S.a = 'Emma'; S.b = 'James';
   function P(name, side, role, first){ var id = uid('p'); S.people.push({id:id,name:name,side:side,role:role,first:!!first}); return id; }
   var carol = P('Carol (mom)','a','parent'), rick = P('Rick (dad)','a','parent'), linda = P('Linda (dad\'s wife)','a','stepparent');
   P('Grandma June','a','grandparent',true); P('Kate (sister)','a','sibling'); P('Tom (Kate\'s husband)','a','sibPartner');
@@ -592,13 +656,71 @@ $('btnExample').addEventListener('click', function(){
   changed(true); say('Example family loaded');
 });
 
+/* Pro events */
+function copyOut(text, note){
+  var done = function(){ $('proNote').textContent = note; };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function(){ prompt('Copy:', text); }); else prompt('Copy:', text);
+}
+document.addEventListener('click', function(e){
+  var t = e.target.closest('button'); if(!t) return;
+  if(t.id==='btnLic'){
+    var k = $('licKey').value.trim();
+    if(!k){ $('licKey').focus(); return; }
+    if(!GUMROAD_PRODUCT_ID){ $('licNote').textContent = 'Pro is not on sale yet.'; return; }
+    $('licNote').textContent = 'Checking…'; t.disabled = true;
+    verifyLicense(k).then(function(ok){
+      t.disabled = false;
+      if(ok){ PRO.key = k; savePro(); renderAll(); say('Pro unlocked'); }
+      else $('licNote').textContent = 'That key was not accepted. Check it was copied in full, or reply to your Gumroad receipt for help.';
+    }, function(){ t.disabled = false; $('licNote').textContent = 'Could not reach Gumroad to check the key. Check your internet connection and try again.'; });
+    return;
+  }
+  if(t.id==='btnLogoDel'){ PRO.logo = ''; savePro(); renderAll(); return; }
+  if(t.id==='btnClientLink'){
+    var blankJson = JSON.stringify(Object.assign(blank(), {studio: PRO.studio || 'Your photographer'}));
+    shareLink(blankJson).then(function(url){ copyOut(url, 'Blank link copied. Send it to the couple; they fill in their family and send you back their own link.'); });
+    return;
+  }
+  if(t.id==='btnSaveW'){
+    var w = getWeddings(), title = (S.a||S.b) ? (nameA()+' & '+nameB()) : 'Untitled wedding';
+    var data = JSON.parse(packState()), d = new Date().toISOString().slice(0,10);
+    var idx = -1; w.forEach(function(x,i){ if(x.title===title) idx = i; });
+    var rec = {title:title, saved:d, data:data};
+    if(idx>=0) w[idx] = rec; else w.unshift(rec);
+    var msg = setWeddings(w) ? 'Saved "'+title+'".' : 'Could not save (browser storage is full or blocked).';
+    renderPro(); $('proNote').textContent = msg; say(msg); return;
+  }
+  if(t.id==='btnNewW'){ if(S.people.length && !confirm('Start a new wedding? Save this one first if you need it.')) return; S = blank(); save(); renderAll(); return; }
+  if(t.dataset.openw){ var x = getWeddings()[+t.dataset.openw]; if(x){ S = Object.assign(blank(), x.data); S.studio = ''; save(); renderAll(); say('Opened '+x.title); window.scrollTo(0,0); } return; }
+  if(t.dataset.delw){ var ww = getWeddings(), y = ww[+t.dataset.delw]; if(y && confirm('Delete '+y.title+'?')){ ww.splice(+t.dataset.delw,1); setWeddings(ww); renderPro(); } return; }
+});
+document.addEventListener('input', function(e){
+  if(e.target.id==='studioIn'){ PRO.studio = e.target.value; savePro(); renderSheet(); }
+});
+document.addEventListener('change', function(e){
+  if(e.target.id==='logoIn' && e.target.files && e.target.files[0]){
+    var f = e.target.files[0], rd = new FileReader();
+    rd.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var sc = Math.min(1, 400/Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        PRO.logo = c.toDataURL('image/png'); savePro(); renderAll();
+      };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  }
+});
+
 /* ---------- boot ---------- */
-load();
+load(); loadPro(); affCode();
 readHash().then(function(o){
   if(o && o.v===1){
     S = Object.assign(blank(), o); save();
     history.replaceState(null,'',location.href.split('#')[0]);
-    var n = $('loadedNote'); n.hidden = false; n.textContent = 'Opened a shared list for ' + nameA() + ' & ' + nameB() + '. Changes you make stay on this device until you share a new link.';
+    if(S.people.length){ var n = $('loadedNote'); n.hidden = false; n.textContent = 'Opened a shared list for ' + nameA() + ' & ' + nameB() + '. Changes you make stay on this device until you share a new link.'; }
   }
   if(!S.shots.length && S.people.length) rebuild();
   renderAll();

@@ -12,166 +12,300 @@
 <meta property="og:url" content="https://aiyoto-myth.github.io/family-formals/">
 <meta property="og:image" content="https://aiyoto-myth.github.io/family-formals/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#faf8f5; --card:#ffffff; --ink:#1f1d1a; --muted:#5f5a52; --line:#ddd6ca;
-  --accent:#7a3e5c; --accent-ink:#ffffff; --soft:#f3ece6; --ok:#1f6b45; --warn:#9a3412; --chipA:#efe4f0; --chipB:#e2ecf3;
-  --focus:#2457c5;
+  --paper:#F5EFE4; --card:#FFFCF6; --ink:#1F1A2B; --ink2:#3F3850; --line:#E2D6C2; --rule:#CDBFA6;
+  --rose:#9E3D4A; --roseSoft:#F4E2DF; --slate:#3D5D7C; --slateSoft:#E1E9F0;
+  --gold:#9A6F22; --goldSoft:#F3E7CC; --ok:#2B6646; --okSoft:#E0EEE4; --out:#9A4A23; --outSoft:#F6E6DA;
+  --film:#1C1823; --filmEdge:#2B2533; --filmInk:#F4EDE1; --focus:#2C5BD0;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r:14px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#171614; --card:#211f1c; --ink:#efebe4; --muted:#b2aca2; --line:#3a3631;
-    --accent:#e3a2c4; --accent-ink:#1a1013; --soft:#2a2622; --ok:#6fd0a0; --warn:#ffab85; --chipA:#3a2b39; --chipB:#253441;
-    --focus:#8fb0ff;
+    --paper:#14111A; --card:#1E1926; --ink:#F2ECE2; --ink2:#DCD3C6; --line:#352D40; --rule:#4A4056;
+    --rose:#E58E99; --roseSoft:#3A2430; --slate:#93B5D8; --slateSoft:#1D2A38;
+    --gold:#E2BA68; --goldSoft:#362B17; --ok:#86D3A5; --okSoft:#163020; --out:#F2A57D; --outSoft:#3A2419;
+    --film:#08070B; --filmEdge:#4A4056; --filmInk:#CFC6B8; --focus:#8FB0FF;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#171614; --card:#211f1c; --ink:#efebe4; --muted:#b2aca2; --line:#3a3631;
-  --accent:#e3a2c4; --accent-ink:#1a1013; --soft:#2a2622; --ok:#6fd0a0; --warn:#ffab85; --chipA:#3a2b39; --chipB:#253441;
-  --focus:#8fb0ff;
+  --paper:#14111A; --card:#1E1926; --ink:#F2ECE2; --ink2:#DCD3C6; --line:#352D40; --rule:#4A4056;
+  --rose:#E58E99; --roseSoft:#3A2430; --slate:#93B5D8; --slateSoft:#1D2A38;
+  --gold:#E2BA68; --goldSoft:#362B17; --ok:#86D3A5; --okSoft:#163020; --out:#F2A57D; --outSoft:#3A2419;
+  --film:#08070B; --filmEdge:#4A4056; --filmInk:#CFC6B8; --focus:#8FB0FF;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:980px;margin:0 auto;padding:20px 16px 80px}
-h1{font-size:28px;line-height:1.2;margin:8px 0 4px}
-.tag{color:var(--muted);margin:0 0 18px;font-size:18px}
-h2{font-size:21px;margin:0 0 4px}
-h3{font-size:17px;margin:0 0 8px}
-.hint{color:var(--muted);font-size:15px;margin:0 0 12px}
-section.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
-.num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;margin-right:8px;font-size:16px;vertical-align:2px}
-label{display:block;font-weight:600;font-size:15px;margin:0 0 4px}
-input[type=text],input[type=time],input[type=number],select{font:inherit;font-size:17px;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
-button{font:inherit;font-size:16px;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
-button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
-button.small{min-height:36px;padding:4px 10px;font-size:15px}
-button.icon{min-width:44px;padding:4px 8px}
-button:disabled{opacity:.45;cursor:not-allowed}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-.row>*{flex:1 1 180px}
-.row>.shrink{flex:0 0 auto}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:760px){.grid2{grid-template-columns:1fr}}
-.side{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
-.checks{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0}
-.checks label{display:flex;align-items:center;gap:6px;font-weight:400;margin:0;min-height:36px}
-.checks input{width:20px;height:20px}
-ul.people{list-style:none;padding:0;margin:10px 0 0}
-ul.people li{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);flex-wrap:wrap}
-ul.people li .who{flex:1 1 140px}
-ul.people li .who small{color:var(--muted);display:block;font-size:14px}
-.badge{font-size:13px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.badge.w{border-color:var(--warn);color:var(--warn)}
-.chip{display:inline-block;font-size:15px;padding:2px 9px;border-radius:99px;margin:2px 3px 2px 0;background:var(--chipA)}
-.chip.b{background:var(--chipB)}
-.chip.c{background:transparent;border:1px solid var(--line)}
-ol.shots{list-style:none;padding:0;margin:10px 0 0;counter-reset:s}
-ol.shots li{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--bg)}
-ol.shots li.off{opacity:.55}
-.shot-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.shot-head .t{flex:1 1 200px;font-weight:600}
-.n{font-weight:800;color:var(--accent);min-width:2.2em}
-.moves{display:flex;gap:4px}
-.sheet{width:100%;border-collapse:collapse;margin-top:10px;font-size:16px}
-.sheet th,.sheet td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
-.sheet th{font-size:14px;color:var(--muted);font-weight:600}
-.in{color:var(--ok);font-weight:600}
-.out{color:var(--warn)}
-.free{font-weight:700}
-.summary{display:flex;flex-wrap:wrap;gap:8px 18px;margin:8px 0;font-size:16px}
-.summary b{font-size:19px}
-.notice{border-left:4px solid var(--accent);background:var(--soft);padding:8px 12px;border-radius:6px;margin:10px 0}
-.warnbox{border-left:4px solid var(--warn);background:var(--soft);padding:8px 12px;border-radius:6px;margin:10px 0}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-details summary{cursor:pointer;font-weight:600;min-height:36px;display:flex;align-items:center}
-.memberpick{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0}
-.memberpick label{display:flex;gap:6px;align-items:center;font-weight:400;margin:0;min-height:36px}
-.memberpick input{width:20px;height:20px}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 var(--body)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+a{color:var(--ink);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-footer{color:var(--muted);font-size:14px;margin-top:30px}
-.scroll{overflow-x:auto}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font:600 20px/1 var(--display);letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.brand svg{flex:0 0 auto}
+.toplink{font-weight:600;font-size:15px;color:var(--ink);text-decoration:none;border:1.5px solid var(--ink);border-radius:999px;padding:7px 14px}
+.toplink:hover{background:var(--ink);color:var(--paper)}
+.brand,.toplink,.tag button{white-space:nowrap}
+@media (max-width:420px){.brand{font-size:18px;gap:8px}.toplink{font-size:14px;padding:6px 11px}}
+.tag{flex-wrap:wrap}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;padding:28px 0 56px}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:28px;padding-bottom:36px}}
+h1{font:600 clamp(40px,6.2vw,72px)/1.02 var(--display);letter-spacing:-.025em;margin:0 0 18px;font-variation-settings:"opsz" 144}
+h1 em{font-style:italic;font-weight:500;color:var(--rose)}
+.lede{font-size:20px;line-height:1.5;margin:0 0 26px;max-width:34em;color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.facts{margin:20px 0 0;font-size:15px;font-weight:500;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px 16px}
+.facts span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:8px;vertical-align:2px}
+
+/* buttons & fields */
+button,.btn{font:600 16px/1.2 var(--body);min-height:46px;padding:12px 20px;border-radius:999px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button:hover,.btn:hover{background:var(--ink);color:var(--paper)}
+button.primary,.btn.primary{background:var(--ink);color:var(--paper)}
+button.primary:hover,.btn.primary:hover{background:var(--rose);border-color:var(--rose);color:#fff}
+button.gold{background:var(--gold);border-color:var(--gold);color:#1A1406}
+button.gold:hover{filter:brightness(1.07);background:var(--gold);color:#1A1406}
+button.small{min-height:36px;padding:6px 12px;font-size:14px}
+button.icon{min-width:38px;min-height:38px;padding:4px;border-radius:50%;font-size:16px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:disabled:hover{background:transparent;color:var(--ink)}
+label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
+input[type=text],input[type=time],input[type=number],select{font:500 17px var(--body);width:100%;min-height:46px;padding:10px 12px;border:1.5px solid var(--rule);border-radius:10px;background:var(--card);color:var(--ink)}
+input:focus,select:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 30%,transparent)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 170px}
+.row>.shrink{flex:0 0 auto}
+
+/* chapters */
+.chapter{padding:46px 0;border-top:1.5px solid var(--line)}
+.chap-head{display:grid;grid-template-columns:86px 1fr;gap:6px 18px;align-items:baseline;margin-bottom:22px}
+@media (max-width:640px){.chap-head{grid-template-columns:1fr}}
+.chap-no{font:500 54px/1 var(--display);color:var(--gold);font-variation-settings:"opsz" 144;letter-spacing:-.03em}
+h2{font:600 clamp(28px,3.4vw,38px)/1.1 var(--display);letter-spacing:-.02em;margin:0}
+.chap-sub{grid-column:2;margin:6px 0 0;font-size:17px;max-width:44em}
+@media (max-width:640px){.chap-sub{grid-column:1}}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:20px}
+
+/* couple invitation line */
+.invite{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:30px 26px;text-align:center;position:relative}
+.invite::before{content:"";position:absolute;inset:8px;border:1px solid var(--rule);border-radius:9px;pointer-events:none}
+.invite p{font:400 clamp(22px,3vw,32px)/1.5 var(--display);margin:0;font-style:italic}
+.invite input{display:inline-block;width:min(240px,70vw);font:600 clamp(22px,3vw,32px) var(--display);font-style:normal;text-align:center;border:0;border-bottom:2px solid var(--ink);border-radius:0;background:transparent;padding:2px 6px;min-height:0;color:var(--ink)}
+.invite input:focus{box-shadow:none;border-bottom-color:var(--rose)}
+.invite input::placeholder{color:var(--ink2);opacity:1;font-weight:400}
+
+/* sides */
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:820px){.sides{grid-template-columns:1fr}}
+.side{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:20px;border-top:6px solid var(--rose)}
+.side.b{border-top-color:var(--slate)}
+.side h3{font:600 24px/1.2 var(--display);margin:0 0 14px}
+.first-toggle{display:flex;align-items:center;gap:10px;margin:12px 0;font-weight:500;font-size:15px}
+.first-toggle input{width:20px;height:20px;accent-color:var(--rose)}
+.side.b .first-toggle input{accent-color:var(--slate)}
+.side .add{width:100%;margin-top:4px}
+.side.a .add{background:var(--rose);border-color:var(--rose);color:#fff}
+.side.b .add{background:var(--slate);border-color:var(--slate);color:#fff}
+.side .add:hover{filter:brightness(1.08)}
+.tags{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:8px}
+.tag{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;border-radius:10px;background:var(--roseSoft);border-left:4px solid var(--rose)}
+.side.b .tag{background:var(--slateSoft);border-left-color:var(--slate)}
+.tag .who{flex:1 1 auto;min-width:0}
+.tag .who b{display:block;font-weight:600}
+.tag .who small{display:block;font-size:13.5px;color:var(--ink)}
+.pill{font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--goldSoft);color:var(--ink);border:1px solid var(--gold);white-space:nowrap}
+.empty{font-size:15px;margin:14px 0 0;color:var(--ink2)}
+
+/* keep apart */
+.apart{margin-top:18px}
+.apart .sentence{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font:italic 400 20px var(--display)}
+.apart .sentence select{width:auto;min-width:170px;flex:1 1 170px;font-style:normal}
+.pairs{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.pairs li{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;border-radius:999px;background:var(--card);border:1.5px dashed var(--rose);font-weight:600}
+.pairs .x{color:var(--rose);font-weight:700}
+
+/* shot list */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.warnbox{border-left:4px solid var(--rose);background:var(--roseSoft);padding:10px 14px;border-radius:8px;margin:0 0 14px;font-weight:500}
+ol.shots{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+ol.shots li{display:grid;grid-template-columns:52px 1fr auto;gap:6px 14px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:12px 14px}
+ol.shots li.off{background:transparent;border-style:dashed}
+ol.shots li.off svg{filter:grayscale(1);opacity:.45}
+.sn{font:500 30px/1 var(--display);color:var(--gold);text-align:center}
+li.off .sn{color:var(--ink2);font-size:22px}
+.st{display:flex;flex-direction:column;gap:6px;min-width:0}
+.st .lab{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer;margin:0}
+.st .lab input{width:20px;height:20px;accent-color:var(--ink);flex:0 0 auto}
+.skip{font-size:12.5px;font-weight:700;color:var(--ink);border:1px solid var(--rule);border-radius:999px;padding:1px 8px}
+.names{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:13px;font-weight:500;padding:2px 9px;border-radius:999px;background:var(--roseSoft)}
+.chip.b{background:var(--slateSoft)}
+.chip.c{background:var(--goldSoft)}
+.moves{display:flex;gap:6px}
+.st svg{max-width:100%;height:auto}
+@media (max-width:640px){
+  ol.shots li{grid-template-columns:1fr;padding:12px}
+  .sn{text-align:left;font-size:26px}
+  .moves{justify-content:flex-end}
+}
+details.custom{margin-top:16px;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:14px 18px}
+details.custom summary{cursor:pointer;font-weight:600;min-height:32px;display:flex;align-items:center}
+.memberpick{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 14px}
+.memberpick label{display:flex;gap:8px;align-items:center;font-weight:500;margin:0;min-height:34px}
+.memberpick input{width:19px;height:19px}
+
+/* the day: stats + film strip */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);margin:18px 0 22px;overflow:hidden}
+.stats div{padding:16px 18px;border-left:1.5px dashed var(--line)}
+.stats div:first-child{border-left:0}
+.stats b{display:block;font:600 36px/1 var(--display);letter-spacing:-.02em}
+.stats span{display:block;font-size:14px;font-weight:600;margin-top:6px}
+@media (max-width:640px){.stats{grid-template-columns:1fr 1fr}.stats div:nth-child(3){border-left:0}.stats div:nth-child(n+3){border-top:1.5px dashed var(--line)}}
+.film{background:var(--film);border:1.5px solid var(--filmEdge);border-radius:18px;padding:30px 44px;position:relative;
+  --hole:radial-gradient(circle at 50% 50%, var(--filmInk) 0 5px, transparent 5.5px);}
+.film::before,.film::after{content:"";position:absolute;top:14px;bottom:14px;width:22px;background:var(--hole);background-size:22px 26px;background-repeat:repeat-y;opacity:.9}
+.film::before{left:10px}.film::after{right:10px}
+@media (max-width:640px){.film{padding:20px 30px}.film::before{left:4px}.film::after{right:4px}}
+#sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media (max-width:860px){#sheet{grid-template-columns:1fr}}
+.pcard{background:var(--card);border-radius:12px;padding:14px 16px 16px;color:var(--ink);animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pcard{animation:none}}
+.ph{display:flex;align-items:baseline;gap:12px}
+.pn{font:600 34px/1 var(--display);color:var(--gold);letter-spacing:-.02em}
+.pt{flex:1 1 auto;font-weight:600;line-height:1.3}
+.tm{font-weight:700;font-size:14px;white-space:nowrap;background:var(--goldSoft);padding:3px 9px;border-radius:999px}
+.figs{margin:10px 0 8px;padding:10px 6px 4px;border-radius:10px;background:var(--paper);display:flex;justify-content:center;overflow:hidden}
+.figs svg{max-width:100%;height:auto}
+.line{margin-top:5px;font-size:15px;line-height:1.45}
+.line .k{font-weight:700;display:inline-block;min-width:88px}
+.line.in .k{color:var(--ok)}
+.line.out .k{color:var(--out)}
+.line.free{background:var(--okSoft);border-radius:8px;padding:5px 8px;margin-top:8px}
+.line.free .k{color:var(--ok)}
+.film-empty{color:var(--filmInk);text-align:center;padding:40px 10px;font:italic 400 22px var(--display)}
+.after{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.note{font-weight:500;margin:12px 0 0;min-height:1.5em}
+.notice{border-left:4px solid var(--gold);background:var(--goldSoft);padding:10px 14px;border-radius:8px;margin:12px 0;font-weight:500}
+.notice a{font-weight:700}
+
+/* pro */
+.pro{display:grid;grid-template-columns:1fr 1fr;gap:28px;background:var(--card);border-radius:20px;padding:32px;position:relative;border:1.5px solid var(--gold)}
+.pro::before{content:"";position:absolute;inset:7px;border:1px solid var(--gold);border-radius:14px;opacity:.5;pointer-events:none}
+@media (max-width:820px){.pro{grid-template-columns:1fr;padding:24px}}
+.price{font:600 64px/1 var(--display);letter-spacing:-.03em;margin:4px 0 2px}
+.price small{font:500 18px var(--body);letter-spacing:0;margin-left:6px}
+.feat{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.feat li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.feat li::before{content:"\2713";width:22px;height:22px;border-radius:50%;background:var(--goldSoft);border:1.5px solid var(--gold);margin-top:2px;
+  color:var(--gold);font-weight:700;font-size:13px;line-height:20px;text-align:center}
+#proHero{margin:0 0 20px}
+.studio-row img{max-height:48px;max-width:180px;vertical-align:middle;margin-right:10px}
+.saved{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+.saved li{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px}
+.saved .who{flex:1}
+
+/* faq */
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:26px 40px}
+@media (max-width:820px){.faq{grid-template-columns:1fr}}
+.faq h3{font:600 21px/1.25 var(--display);margin:0 0 6px}
+.faq p{margin:0}
+footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+/* print */
 #printSheet{display:none}
-.pcard{border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--bg)}
-.pcard .ph{display:flex;gap:10px;align-items:baseline}
-.pcard .pt{flex:1}
-.pcard .pn{font-size:20px;font-weight:800;color:var(--accent)}
-.pcard .tm{color:var(--muted);white-space:nowrap}
-.pcard div{margin-top:3px}
-.pcard .pin{font-weight:700}
-.pcard .lbl{color:var(--muted)}
 @media print{
-  body{background:#fff;color:#000;font-size:15pt}
-  main>*:not(#printSheet){display:none !important}
+  body{background:#fff;color:#000;font:14pt/1.4 Georgia,serif}
+  body > *:not(#printSheet){display:none !important}
   #printSheet{display:block}
-  .pcard{border:2px solid #000;border-radius:8px;padding:8px 12px;margin:0 0 8px;break-inside:avoid;background:#fff;color:#000}
-  .pcard .pn{font-size:20pt;color:#000}
-  .pcard .tm,.pcard .lbl{color:#000}
+  #printSheet .pc{border:2px solid #000;border-radius:8px;padding:8px 12px;margin:0 0 8px;break-inside:avoid}
+  #printSheet .pc b.n{font-size:20pt}
 }
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <h1>Wedding family photo list &amp; order planner</h1>
-    <p class="tag">Enter the family once. Get the best order for the family photos, who to call next, and who is free to go.</p>
-    <div id="proHero" class="notice" hidden>
-      <p style="margin:0 0 6px"><b>For wedding photographers:</b> send the couple one link. Get the shot order, the call cards, and who can leave, with your studio logo on them.</p>
-      <p style="margin:0" id="proHeroCta"></p>
-    </div>
-    <div class="toolbar">
-      <button type="button" id="btnExample">Try it with an example family</button>
-      <button type="button" id="btnClear">Start over</button>
-    </div>
-    <p class="hint">Free. No sign-up. Everything stays on this device until you share a link.</p>
-  </header>
+<div class="wrap">
+  <nav class="top" aria-label="Site">
+    <a class="brand" href="#">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="13" cy="17" r="9.5" fill="none" stroke="var(--rose)" stroke-width="3"/><circle cx="21" cy="17" r="9.5" fill="none" stroke="var(--gold)" stroke-width="3"/></svg>
+      Family Formals
+    </a>
+    <a class="toplink" href="#proSection">For photographers</a>
+  </nav>
 
+  <header class="hero">
+    <div>
+      <h1>Family photos, <em>in the right order.</em></h1>
+      <p class="lede">Type the family in once. Get the list of group photos, the order that lets everyone leave soonest, and a call card for whoever is shouting names.</p>
+      <div id="proHero" class="notice" hidden>
+        <p style="margin:0 0 10px"><b>For wedding photographers:</b> send the couple one link. Get the shot order, the call cards and who can leave, with your studio logo on them.</p>
+        <p style="margin:0" id="proHeroCta"></p>
+      </div>
+      <div class="cta">
+        <button type="button" class="primary" id="btnExample">See it with an example family</button>
+        <a class="btn" href="#plan">Start with my family</a>
+      </div>
+      <p class="facts"><span>Free</span><span>No sign-up</span><span>Nothing uploaded</span><span>Works on a phone</span></p>
+    </div>
+    <div class="film" aria-hidden="true" id="heroFilm"></div>
+  </header>
+</div>
+
+<main class="wrap" id="plan">
   <div id="studioNote" class="notice" hidden></div>
   <div id="loadedNote" class="notice" hidden></div>
 
-  <section class="step" aria-labelledby="h1s">
-    <h2 id="h1s"><span class="num" aria-hidden="true">1</span>The couple</h2>
-    <div class="row">
-      <div><label for="nameA">First partner's name</label><input type="text" id="nameA" autocomplete="off" placeholder="e.g. Emma"></div>
-      <div><label for="nameB">Second partner's name</label><input type="text" id="nameB" autocomplete="off" placeholder="e.g. James"></div>
+  <section class="chapter" aria-labelledby="h1s">
+    <div class="chap-head"><span class="chap-no" aria-hidden="true">01</span><h2 id="h1s">The couple <button type="button" class="small" id="btnClear" style="vertical-align:middle;margin-left:10px">Start over</button></h2></div>
+    <div class="invite">
+      <p>The family photos of <input type="text" id="nameA" autocomplete="off" placeholder="Emma" aria-label="First partner's name"> &amp; <input type="text" id="nameB" autocomplete="off" placeholder="James" aria-label="Second partner's name"></p>
     </div>
   </section>
 
-  <section class="step" aria-labelledby="h2s">
-    <h2 id="h2s"><span class="num" aria-hidden="true">2</span>Who is in the photos</h2>
-    <p class="hint">Add family on each side. Tick "needs to go first" for grandparents who can't stand long, small kids, or anyone leaving early. They get finished first.</p>
-    <div class="grid2" id="sides"></div>
-
-    <h3 style="margin-top:18px">Keep apart <span class="hint" style="font-weight:400">(for example divorced parents)</span></h3>
-    <p class="hint">People listed here will never be put in the same photo. You get one photo with each of them instead.</p>
-    <div class="row">
-      <div><label for="apartA">Person</label><select id="apartA"></select></div>
-      <div><label for="apartB">should not stand with</label><select id="apartB"></select></div>
-      <div class="shrink"><button type="button" id="btnApart">Add</button></div>
+  <section class="chapter" aria-labelledby="h2s">
+    <div class="chap-head"><span class="chap-no" aria-hidden="true">02</span><h2 id="h2s">Who is in the photos</h2>
+      <p class="chap-sub">Add each side's family. Tick "needs to go first" for a grandparent who can't stand long, a small child, or anyone leaving early: their photos happen first.</p></div>
+    <div class="sides" id="sides"></div>
+    <div class="apart card">
+      <div class="sentence">
+        <select id="apartA" aria-label="Person"></select>
+        <span>never stands next to</span>
+        <select id="apartB" aria-label="Should not stand with"></select>
+        <button type="button" class="small" id="btnApart">Keep apart</button>
+      </div>
+      <p class="empty" style="margin-top:10px">For divorced parents and the like. Instead of one photo with both, you get one photo with each.</p>
+      <ul class="pairs" id="apartList" aria-label="People kept apart"></ul>
     </div>
-    <ul class="people" id="apartList" aria-label="People kept apart"></ul>
   </section>
 
-  <section class="step" aria-labelledby="h3s">
-    <h2 id="h3s"><span class="num" aria-hidden="true">3</span>The photo list</h2>
-    <p class="hint">We suggest the usual family photos. Untick any you don't want, add your own, then press "Best order".</p>
+  <section class="chapter" aria-labelledby="h3s">
+    <div class="chap-head"><span class="chap-no" aria-hidden="true">03</span><h2 id="h3s">The photo list</h2>
+      <p class="chap-sub">The usual family photos are suggested from the people you added. Untick any you don't want, add your own, then put them in order.</p></div>
     <div class="toolbar">
-      <button type="button" class="primary" id="btnOrder">Best order</button>
-      <button type="button" id="btnRebuild">Re-suggest photos</button>
+      <button type="button" class="gold" id="btnOrder">Put them in the best order</button>
+      <button type="button" id="btnRebuild">Suggest the list again</button>
     </div>
     <div id="conflictNote"></div>
     <ol class="shots" id="shotList" aria-label="Photo list"></ol>
-    <details id="customBox" style="margin-top:10px">
+    <details class="custom" id="customBox">
       <summary>Add your own photo</summary>
-      <div style="margin-top:8px">
+      <div style="margin-top:12px">
         <label for="customLabel">Name of the photo</label>
         <input type="text" id="customLabel" placeholder="e.g. Couple with the college roommates">
-        <div class="checks">
+        <div class="memberpick">
           <label><input type="checkbox" id="customA" checked> <span id="customALabel">Partner 1</span></label>
           <label><input type="checkbox" id="customB" checked> <span id="customBLabel">Partner 2</span></label>
         </div>
-        <fieldset style="border:0;padding:0;margin:0"><legend class="hint">Who else is in it</legend>
+        <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;font-size:14px">Who else is in it</legend>
           <div class="memberpick" id="customMembers"></div>
         </fieldset>
         <button type="button" id="btnCustom">Add photo</button>
@@ -179,53 +313,60 @@ footer{color:var(--muted);font-size:14px;margin-top:30px}
     </details>
   </section>
 
-  <section class="step" aria-labelledby="h4s">
-    <h2 id="h4s"><span class="num" aria-hidden="true">4</span>Run sheet</h2>
-    <p class="hint">Give this to the person calling names. Each line says who steps in, who steps out, and who can go.</p>
-    <div class="row">
-      <div><label for="startTime">Start time</label><input type="time" id="startTime" value="16:00"></div>
+  <section class="chapter" aria-labelledby="h4s">
+    <div class="chap-head"><span class="chap-no" aria-hidden="true">04</span><h2 id="h4s">On the day</h2>
+      <p class="chap-sub">Hand this to the relative calling names. Every photo says who steps in, who steps out, and who is free to go.</p></div>
+    <div class="row" style="max-width:520px">
+      <div><label for="startTime">Photos start at</label><input type="time" id="startTime" value="16:00"></div>
       <div><label for="perShot">Minutes per photo</label><input type="number" id="perShot" min="0.5" max="10" step="0.5" value="1.5"></div>
     </div>
-    <div class="summary" id="summary" aria-live="polite"></div>
-    <div id="sheet"></div>
-    <div class="toolbar">
+    <div class="stats" id="summary" aria-live="polite"></div>
+    <div class="film"><div id="sheet"></div></div>
+    <div class="after">
       <button type="button" class="primary" id="btnPrint">Print call cards</button>
       <button type="button" id="btnShare">Copy share link</button>
       <button type="button" id="btnCopyText">Copy as text</button>
     </div>
-    <p class="hint" id="shareNote" aria-live="polite"></p>
+    <p class="note" id="shareNote" aria-live="polite"></p>
     <p class="notice" id="proNudge" hidden></p>
   </section>
 
-  <section class="step" aria-labelledby="h5s" id="proSection">
-    <h2 id="h5s">For photographers: Pro</h2>
-    <div id="proBody"></div>
+  <section class="chapter" aria-labelledby="h5s" id="proSection">
+    <div class="pro">
+      <div>
+        <h2 id="h5s">For photographers: Pro</h2>
+        <p class="price">$19<small>once, every wedding</small></p>
+        <p style="margin:12px 0 0">Everything above stays free for couples and photographers. Pro is for photographers who use it at every wedding.</p>
+      </div>
+      <div id="proBody"></div>
+    </div>
   </section>
 
-  <div id="printSheet"></div>
-  <p class="sr" id="live" aria-live="polite"></p>
-
-  <section class="step" aria-labelledby="faqh" id="faq">
-    <h2 id="faqh">Wedding family photos: common questions</h2>
-    <h3>Who is included in the family photos at a wedding?</h3>
-    <p>Most couples photograph each side separately: first the whole extended family on one side (grandparents, aunts, uncles, cousins), then the immediate family (parents, brothers and sisters, their partners and kids), then just the parents. Then the same for the other side, and one photo with both sets of parents together. This planner suggests exactly that list from the people you enter, and you can untick or add any photo.</p>
-    <h3>What order should wedding family photos go in?</h3>
-    <p>Start with the biggest group and take people away, so each person is done as early as possible and can go and enjoy the party. Finish one family before starting the other, so people are not called back. Grandparents, small children and anyone leaving early should be finished first. The planner works this order out for you and shows, for every photo, who steps in, who steps out and who is free to go.</p>
-    <h3>How long do wedding family photos take?</h3>
-    <p>Plan about one to two minutes per photo once everyone is there. Fifteen photos take roughly 20 to 30 minutes. Set your start time and minutes per photo in the run sheet and the planner shows when you will be done.</p>
-    <h3>How do you handle divorced parents in wedding photos?</h3>
-    <p>Add both parents, then add them under "Keep apart". The planner never puts them in the same photo; every group they would both be in is split into one photo with each of them, and a new partner can stand with the parent they came with.</p>
-    <h3>Who should call out names during family photos?</h3>
-    <p>Pick one relative who knows everyone on each side and give them the printed call cards. Each card says which photo is next, who steps in, who steps out and who can leave, so the photographer does not have to read names off a list.</p>
-    <h3>Is it free?</h3>
-    <p>Yes, for couples and photographers. Nothing is uploaded and there is no sign-up: your list stays on your device, and the share link carries the list inside the link. Photographers who use it at every wedding can get Pro for their studio logo on the cards, a link for each couple and saved weddings.</p>
+  <section class="chapter" aria-labelledby="faqh" id="faq">
+    <div class="chap-head"><span class="chap-no" aria-hidden="true">?</span><h2 id="faqh">Wedding family photos, answered</h2></div>
+    <div class="faq">
+      <div><h3>Who is included in the family photos at a wedding?</h3>
+      <p>Most couples photograph each side separately: first the whole extended family on one side (grandparents, aunts, uncles, cousins), then the immediate family (parents, brothers and sisters, their partners and kids), then just the parents. Then the same for the other side, and one photo with both sets of parents together. This planner suggests exactly that list from the people you enter, and you can untick or add any photo.</p></div>
+      <div><h3>What order should wedding family photos go in?</h3>
+      <p>Start with the biggest group and take people away, so each person is done as early as possible and can go and enjoy the party. Finish one family before starting the other, so people are not called back. Grandparents, small children and anyone leaving early should be finished first. The planner works this order out for you and shows, for every photo, who steps in, who steps out and who is free to go.</p></div>
+      <div><h3>How long do wedding family photos take?</h3>
+      <p>Plan about one to two minutes per photo once everyone is there. Fifteen photos take roughly 20 to 30 minutes. Set your start time and minutes per photo and the planner shows when you will be done.</p></div>
+      <div><h3>How do you handle divorced parents in wedding photos?</h3>
+      <p>Add both parents, then keep them apart. The planner never puts them in the same photo; every group they would both be in is split into one photo with each of them, and a new partner can stand with the parent they came with.</p></div>
+      <div><h3>Who should call out names during family photos?</h3>
+      <p>Pick one relative who knows everyone on each side and give them the printed call cards. Each card says which photo is next, who steps in, who steps out and who can leave, so the photographer does not have to read names off a list.</p></div>
+      <div><h3>Is it free?</h3>
+      <p>Yes, for couples and photographers. Nothing is uploaded and there is no sign-up: your list stays on your device, and the share link carries the list inside the link. Photographers who use it at every wedding can get Pro for their studio logo on the cards, a link for each couple and saved weddings.</p></div>
+    </div>
   </section>
 
   <footer>
-    The order is worked out so people can leave as early as possible, people who need to go first are done first, and as few people as possible walk in and out between photos. You can still move any photo up or down.
+    <span>Family Formals: the order is worked out so people leave as early as possible, people who need to go first are done first, and as few people as possible walk in and out between photos. You can still move any photo.</span>
   </footer>
 </main>
 
+<div id="printSheet"></div>
+<p class="sr" id="live" aria-live="polite"></p>
 <script>
 (function(){
 'use strict';
@@ -247,8 +388,8 @@ var KEY = 'ffp.v1';
 
 /* ---------- Pro (Gumroad) ---------- */
 var SITE = 'https://aiyoto-myth.github.io/family-formals/';
-var GUMROAD_URL = '';         // product page, filled in once the product exists
-var GUMROAD_PRODUCT_ID = '';  // for license checks
+var GUMROAD_URL = '';  // checkout moves to Whop (user 11-23); Gumroad draft: crazyoldie.gumroad.com/l/family-formals-pro
+var GUMROAD_PRODUCT_ID = '';
 var PRICE = '$19';
 var PRO = {key:'', studio:'', logo:''};
 function loadPro(){ try{ var t = localStorage.getItem('ffp.pro'); if(t) PRO = Object.assign(PRO, JSON.parse(t)); }catch(e){} }
@@ -485,34 +626,84 @@ function readHash(){
 function $(id){ return document.getElementById(id); }
 function say(t){ $('live').textContent = ''; setTimeout(function(){ $('live').textContent = t; }, 30); }
 
+/* People drawn as a row of figures: one side on the left, the couple in the middle, the other side on the right. */
+function figList(f){
+  var a = [], c = [], b = [];
+  f.forEach(function(id){
+    if(id==='A' || id==='B'){ c.push({id:id, kind:'c', name:pname(id)}); return; }
+    var p = person(id); if(!p) return;
+    (p.side==='a' ? a : b).push({id:id, kind:p.side, name:p.name, kid:p.role==='sibKid'});
+  });
+  c.sort(function(x,y){ return x.id < y.id ? -1 : 1; });
+  return a.concat(c, b);
+}
+function figSVG(list, hi){
+  hi = hi || [];
+  var W = 22, n = list.length, w = Math.max(n*W + 8, 64), h = 58, out = [];
+  out.push('<svg viewBox="0 0 '+w+' '+h+'" width="'+Math.round(w*1.3)+'" height="'+Math.round(h*1.3)+'" role="img" aria-label="In the photo: '+esc(list.map(function(f){ return f.name; }).join(', '))+'">');
+  out.push('<line x1="0" y1="50.5" x2="'+w+'" y2="50.5" stroke="var(--rule)" stroke-width="1"/>');
+  list.forEach(function(f, i){
+    var s = f.kid ? 0.76 : 1, x = 4 + i*W + (1-s)*W/2, y = (1-s)*50;
+    var col = f.kind==='c' ? 'var(--gold)' : (f.kind==='a' ? 'var(--rose)' : 'var(--slate)');
+    out.push('<g transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+') scale('+s+')"><title>'+esc(f.name)+'</title>'
+      + '<circle cx="9" cy="14" r="6.5" fill="'+col+'"/>'
+      + '<path d="M1 50 V35 a8 8 0 0 1 8 -8 a8 8 0 0 1 8 8 V50 Z" fill="'+col+'"/>'
+      + (f.kind==='c' ? '<circle cx="9" cy="4" r="2.6" fill="none" stroke="var(--gold)" stroke-width="1.6"/>' : '')
+      + (f.id && hi.indexOf(f.id)>=0 ? '<rect x="0" y="53" width="18" height="3.5" rx="1.75" fill="var(--ok)"/>' : '')
+      + '</g>');
+  });
+  out.push('</svg>');
+  return out.join('');
+}
+
+function renderHero(){
+  var el = $('heroFilm'); if(!el || el.dataset.done) return;
+  function L(spec){ var r = []; spec.split('').forEach(function(ch){ r.push(ch==='k' ? {kind:'a', name:'', kid:true} : {kind: ch==='c' ? 'c' : ch, name:''}); }); return r; }
+  var demo = [
+    ['1', 'Everyone on Emma\'s side', '4:00 PM', 'aaakaaacc', 'Aunt Sue, Uncle Bob'],
+    ['3', 'Emma\'s grandparents', '4:03 PM', 'acc', 'Grandma June'],
+    ['12', 'Both sets of parents, with Carol', '4:17 PM', 'accbb', '']
+  ];
+  el.innerHTML = demo.map(function(d){
+    return '<div class="pcard" style="margin:0 0 14px"><div class="ph"><span class="pn">'+d[0]+'</span><span class="pt">'+esc(d[1])+'</span><span class="tm">'+d[2]+'</span></div>'
+      + '<div class="figs">'+figSVG(L(d[3]))+'</div>'
+      + (d[4] ? '<div class="line free"><span class="k">Free to go</span> '+esc(d[4])+'</div>' : '<div class="line"><span class="k">Step in</span> James\'s parents</div>')
+      + '</div>';
+  }).join('');
+  el.lastChild.style.marginBottom = '0';
+  el.dataset.done = '1';
+}
+
 function renderSides(){
   var html = '';
   ['a','b'].forEach(function(s){
     var P = bySide(s);
-    html += '<div class="side"><h3>'+esc(sideName(s))+'\'s family</h3>'
+    html += '<div class="side '+s+'"><h3>'+esc(sideName(s))+'\'s family</h3>'
       + '<div class="row"><div><label for="nm_'+s+'">Name</label><input type="text" id="nm_'+s+'" autocomplete="off" placeholder="e.g. Grandma June"></div>'
       + '<div><label for="rl_'+s+'">Who they are</label><select id="rl_'+s+'">'
       + ROLES.map(function(r){ return '<option value="'+r[0]+'">'+esc(r[1])+'</option>'; }).join('')
       + '</select></div></div>'
-      + '<div class="checks"><label><input type="checkbox" id="fs_'+s+'"> Needs to go first (elderly, small child, leaving early)</label></div>'
-      + '<button type="button" class="primary" data-add="'+s+'">Add to '+esc(sideName(s))+'\'s family</button>'
-      + '<ul class="people" aria-label="'+esc(sideName(s))+'\'s family">'
-      + P.map(function(p){
-          return '<li><span class="who">'+esc(p.name)+'<small>'+esc(ROLE_NAME[p.role]||p.role)+'</small></span>'
-            + (p.first ? '<span class="badge w">goes first</span>' : '')
-            + '<button type="button" class="small" data-first="'+p.id+'" aria-pressed="'+(p.first?'true':'false')+'">'+(p.first?'Unmark':'Goes first')+'</button>'
-            + '<button type="button" class="small" data-del="'+p.id+'" aria-label="Remove '+esc(p.name)+'">Remove</button></li>';
-        }).join('')
-      + '</ul></div>';
+      + '<label class="first-toggle"><input type="checkbox" id="fs_'+s+'"> Needs to go first (elderly, small child, leaving early)</label>'
+      + '<button type="button" class="add" data-add="'+s+'">Add to '+esc(sideName(s))+'\'s family</button>'
+      + (P.length ? '<ul class="tags" aria-label="'+esc(sideName(s))+'\'s family">'
+        + P.map(function(p){
+            return '<li class="tag"><span class="who"><b>'+esc(p.name)+'</b><small>'+esc(ROLE_NAME[p.role]||p.role)+'</small></span>'
+              + (p.first ? '<span class="pill">goes first</span>' : '')
+              + '<button type="button" class="small" data-first="'+p.id+'" aria-pressed="'+(p.first?'true':'false')+'">'+(p.first?'Not first':'Goes first')+'</button>'
+              + '<button type="button" class="icon" data-del="'+p.id+'" aria-label="Remove '+esc(p.name)+'">&#10005;</button></li>';
+          }).join('') + '</ul>'
+        : '<p class="empty">Nobody added yet.</p>')
+      + '</div>';
   });
   $('sides').innerHTML = html;
 }
 
 function renderApart(){
-  var opts = '<option value="">Choose…</option>' + S.people.map(function(p){ return '<option value="'+p.id+'">'+esc(p.name)+' ('+esc(sideName(p.side))+')</option>'; }).join('');
+  var opts = '<option value="">Choose someone</option>' + S.people.map(function(p){ return '<option value="'+p.id+'">'+esc(p.name)+' ('+esc(sideName(p.side))+')</option>'; }).join('');
   $('apartA').innerHTML = opts; $('apartB').innerHTML = opts;
   $('apartList').innerHTML = S.apart.map(function(pr,i){
-    return '<li><span class="who">'+esc(pname(pr[0]))+' &nbsp;✕&nbsp; '+esc(pname(pr[1]))+'</span><button type="button" class="small" data-unapart="'+i+'">Remove</button></li>';
+    return '<li>'+esc(pname(pr[0]))+' <span class="x" aria-hidden="true">&#8800;</span> '+esc(pname(pr[1]))
+      + '<button type="button" class="icon" data-unapart="'+i+'" aria-label="Stop keeping '+esc(pname(pr[0]))+' and '+esc(pname(pr[1]))+' apart">&#10005;</button></li>';
   }).join('');
 }
 
@@ -528,49 +719,67 @@ function renderShots(){
   var act = 0;
   $('shotList').innerHTML = S.shots.map(function(s,i){
     var on = !S.disabled[s.id]; if(on) act++;
-    return '<li class="'+(on?'':'off')+'"><div class="shot-head">'
-      + '<span class="n">'+(on?('#'+act):'—')+'</span>'
-      + '<label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:600;flex:1 1 200px"><input type="checkbox" data-toggle="'+esc(s.id)+'" '+(on?'checked':'')+' style="width:22px;height:22px"> '+esc(s.label)+'</label>'
-      + '<span class="moves"><button type="button" class="small icon" data-up="'+i+'" aria-label="Move '+esc(s.label)+' up" '+(i===0?'disabled':'')+'>↑</button>'
-      + '<button type="button" class="small icon" data-down="'+i+'" aria-label="Move '+esc(s.label)+' down" '+(i===S.shots.length-1?'disabled':'')+'>↓</button>'
+    return '<li class="'+(on?'':'off')+'">'
+      + '<span class="sn">'+(on ? act : '&ndash;')+'</span>'
+      + '<div class="st"><label class="lab"><input type="checkbox" data-toggle="'+esc(s.id)+'" '+(on?'checked':'')+'> <span>'+esc(s.label)+'</span>'+(on?'':' <span class="skip">skipped</span>')+'</label>'
+      + figSVG(figList(frame(s)))
+      + '<div class="names">'+chips(s)+'</div></div>'
+      + '<div class="moves"><button type="button" class="icon" data-up="'+i+'" aria-label="Move '+esc(s.label)+' up" '+(i===0?'disabled':'')+'>&#8593;</button>'
+      + '<button type="button" class="icon" data-down="'+i+'" aria-label="Move '+esc(s.label)+' down" '+(i===S.shots.length-1?'disabled':'')+'>&#8595;</button>'
       + (s.custom ? '<button type="button" class="small" data-delshot="'+i+'">Delete</button>' : '')
-      + '</span></div><div style="margin-top:6px">'+chips(s)+'</div></li>';
-  }).join('') || '<li>Add some family members above and the usual photos will appear here.</li>';
+      + '</div></li>';
+  }).join('') || '<li style="display:block" class="empty">Add family in step 02 and the usual photos appear here.</li>';
   var anySplit = S.shots.some(function(s){ return s.split && !S.disabled[s.id]; });
-  $('conflictNote').innerHTML = anySplit ? '<div class="warnbox">Some photos were split in two so that people you keep apart are never side by side.</div>' : '';
+  $('conflictNote').innerHTML = anySplit ? '<div class="warnbox">Some photos were split in two, so the people you keep apart never stand side by side.</div>' : '';
   $('customALabel').textContent = nameA(); $('customBLabel').textContent = nameB();
-  $('customMembers').innerHTML = S.people.map(function(p){ return '<label><input type="checkbox" value="'+p.id+'"> '+esc(p.name)+'</label>'; }).join('') || '<span class="hint">Add family first.</span>';
+  $('customMembers').innerHTML = S.people.map(function(p){ return '<label><input type="checkbox" value="'+p.id+'"> '+esc(p.name)+'</label>'; }).join('') || '<span class="empty" style="margin:0">Add family first.</span>';
 }
 
 function renderSheet(){
   var rows = runSheet();
-  if(!rows.length){ $('sheet').innerHTML = ''; $('summary').innerHTML = ''; $('printSheet').innerHTML=''; return; }
+  if(!rows.length){
+    $('summary').innerHTML = '<div><b>0</b><span>photos</span></div><div><b>0</b><span>minutes</span></div><div><b>&ndash;</b><span>done by</span></div><div><b>0</b><span>walk-ons and walk-offs</span></div>';
+    $('sheet').innerHTML = '<p class="film-empty" style="grid-column:1/-1">Each photo becomes a frame here, in order.</p>';
+    $('printSheet').innerHTML = '';
+    return;
+  }
   var moves = 0; rows.forEach(function(r,k){ if(k>0) moves += r.inn.length + r.out.length; });
   var mins = rows.length * (+S.per||1.5);
-  $('summary').innerHTML = '<span><b>'+rows.length+'</b> photos</span><span>about <b>'+Math.round(mins)+'</b> minutes</span><span>done around <b>'+clock(rows.length)+'</b></span><span><b>'+moves+'</b> people walking in or out</span>';
-  var cards = rows.map(function(r){
-    return '<div class="pcard"><div class="ph"><span class="pn">#'+(r.k+1)+'</span><span class="pt">'+esc(r.shot.label)+'</span><span class="tm">'+clock(r.k)+'</span></div>'
-      + '<div><span class="lbl">In the photo:</span> '+esc(names(r.frame))+'</div>'
-      + (r.inn.length && r.k>0 ? '<div class="pin in">STEP IN: '+esc(names(r.inn))+'</div>' : '')
-      + (r.out.length ? '<div class="out">Step out: '+esc(names(r.out))+'</div>' : '')
-      + (r.free.length ? '<div class="pin free">FREE TO GO: '+esc(names(r.free))+'</div>' : '')
-      + (r.next.length ? '<div><span class="lbl">Call next:</span> '+esc(names(r.next))+'</div>' : '')
-      + '</div>';
+  $('summary').innerHTML = '<div><b>'+rows.length+'</b><span>photos</span></div><div><b>'+Math.round(mins)+'</b><span>minutes</span></div><div><b>'+clock(rows.length)+'</b><span>done by</span></div><div><b>'+moves+'</b><span>walk-ons and walk-offs</span></div>';
+  $('sheet').innerHTML = rows.map(function(r){
+    return '<article class="pcard" style="animation-delay:'+(Math.min(r.k,12)*35)+'ms">'
+      + '<div class="ph"><span class="pn">'+(r.k+1)+'</span><span class="pt">'+esc(r.shot.label)+'</span><span class="tm">'+clock(r.k)+'</span></div>'
+      + '<div class="figs">'+figSVG(figList(r.frame), r.k>0 ? r.inn : [])+'</div>'
+      + '<div class="line"><span class="k">In the photo</span> '+esc(names(r.frame))+'</div>'
+      + (r.inn.length && r.k>0 ? '<div class="line in"><span class="k">Step in</span> '+esc(names(r.inn))+'</div>' : '')
+      + (r.out.length ? '<div class="line out"><span class="k">Step out</span> '+esc(names(r.out))+'</div>' : '')
+      + (r.free.length ? '<div class="line free"><span class="k">Free to go</span> '+esc(names(r.free))+'</div>' : '')
+      + (r.next.length ? '<div class="line"><span class="k">Call next</span> '+esc(names(r.next))+'</div>' : '')
+      + '</article>';
   }).join('');
-  $('sheet').innerHTML = cards;
   var brand = '';
   if(isPro() && (PRO.logo || PRO.studio)) brand = '<div style="display:flex;align-items:center;gap:12px;margin:0 0 8px">' + (PRO.logo ? '<img src="'+PRO.logo+'" alt="" style="max-height:60px;max-width:200px">' : '') + (PRO.studio ? '<b style="font-size:14pt">'+esc(PRO.studio)+'</b>' : '') + '</div>';
-  $('printSheet').innerHTML = brand + '<h1 style="font-size:20pt;margin:0 0 6px">Family photos \u00b7 '+esc(nameA())+' &amp; '+esc(nameB())+'</h1>'
-    + '<p style="margin:0 0 10px">'+rows.length+' photos \u00b7 start '+clock(0)+' \u00b7 done about '+clock(rows.length)+'</p>' + cards
-    + (isPro() ? '' : '<p style="margin-top:10px;font-size:10pt">Made with Family Formals Planner, free at '+SITE+' \u00b7 Photographers: put your studio logo on these cards at '+SITE+'?for=pro</p>');
+  $('printSheet').innerHTML = brand + '<h1 style="font-size:20pt;margin:0 0 6px">Family photos · '+esc(nameA())+' &amp; '+esc(nameB())+'</h1>'
+    + '<p style="margin:0 0 10px">'+rows.length+' photos · start '+clock(0)+' · done about '+clock(rows.length)+'</p>'
+    + rows.map(function(r){
+      return '<div class="pc"><b class="n">#'+(r.k+1)+'</b> '+esc(r.shot.label)+' <span style="float:right">'+clock(r.k)+'</span>'
+        + '<div>In the photo: '+esc(names(r.frame))+'</div>'
+        + (r.inn.length && r.k>0 ? '<div><b>STEP IN: '+esc(names(r.inn))+'</b></div>' : '')
+        + (r.out.length ? '<div>Step out: '+esc(names(r.out))+'</div>' : '')
+        + (r.free.length ? '<div><b>FREE TO GO: '+esc(names(r.free))+'</b></div>' : '')
+        + (r.next.length ? '<div>Call next: '+esc(names(r.next))+'</div>' : '')
+        + '</div>';
+    }).join('')
+    + (isPro() ? '' : '<p style="margin-top:10px;font-size:10pt">Made with Family Formals Planner, free at '+SITE+' · Photographers: put your studio logo on these cards at '+SITE+'?for=pro</p>');
 }
 
 function renderAll(){
+  renderHero();
   $('nameA').value = S.a; $('nameB').value = S.b;
   $('startTime').value = S.start || '16:00'; $('perShot').value = S.per || 1.5;
   renderSides(); renderApart(); renderShots(); renderSheet(); renderPro();
   var st = $('studioNote');
-  if(S.studio && !isPro()){ st.hidden = false; st.textContent = S.studio + ' asked you to fill this in. Add your family below, then press "Copy share link" at the bottom and send the link back to them.'; }
+  if(S.studio && !isPro()){ st.hidden = false; st.textContent = S.studio + ' asked you to fill this in. Add your family below, then press "Copy share link" in step 04 and send the link back to them.'; }
   else st.hidden = true;
 }
 
@@ -578,21 +787,20 @@ function renderPro(){
   var h = '';
   if(!isPro()){
     var url = buyUrl();
-    h += '<p class="hint">Everything above is free, for couples and photographers. Pro is for photographers who use it at every wedding:</p>'
-      + '<ul class="hint" style="margin-top:0"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name to send to each couple, so they fill in their family before the day</li><li>Save every wedding on this device and switch between them</li><li>No "Made with" line on what you print or copy</li></ul>'
-      + (url ? '<p><a class="primary" style="display:inline-block;padding:10px 16px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none" href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">Get Pro for '+PRICE+', once</a></p><p class="hint">One payment, no subscription. 30-day refund: just reply to your receipt.</p>' : '<p class="hint"><b>Pro is coming soon.</b></p>')
-      + '<div class="row"><div><label for="licKey">Already bought? Paste your license key</label><input type="text" id="licKey" autocomplete="off" spellcheck="false"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
-      + '<p class="hint" id="licNote" aria-live="polite"></p>';
+    h += '<ul class="feat"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name for every couple, so they fill in their family before the day</li><li>Every wedding saved on this device, one click to switch</li><li>No "Made with" line on anything you print or copy</li></ul>'
+      + (url ? '<p style="margin:22px 0 6px"><a class="btn primary" data-buy="1" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro, '+PRICE+' once</a></p><p style="margin:0;font-size:15px">One payment, no subscription. 30-day refund: just reply to your receipt.</p>'
+             : '<p class="notice" style="margin-top:20px">Pro goes on sale in a few days. Everything else works now.</p>')
+      + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Paste your license key</label><input type="text" id="licKey" autocomplete="off" spellcheck="false"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
+      + '<p class="note" id="licNote" aria-live="polite"></p>';
   } else {
     var w = getWeddings();
-    h += '<p class="hint">Pro is unlocked on this device. Thank you.</p>'
+    h += '<p style="margin:0 0 14px;font-weight:600">Pro is unlocked on this device. Thank you.</p>'
       + '<div class="row"><div><label for="studioIn">Studio name</label><input type="text" id="studioIn" value="'+esc(PRO.studio)+'" autocomplete="off"></div>'
-      + '<div><label for="logoIn">Logo (shown on printed cards)</label><input type="file" id="logoIn" accept="image/*"></div></div>'
-      + (PRO.logo ? '<p><img src="'+PRO.logo+'" alt="Your logo" style="max-height:48px;max-width:180px;vertical-align:middle"> <button type="button" class="small" id="btnLogoDel">Remove logo</button></p>' : '')
-      + '<div class="toolbar"><button type="button" class="primary" id="btnClientLink">Copy a blank link for your couple</button><button type="button" id="btnSaveW">Save this wedding</button><button type="button" id="btnNewW">New wedding</button></div>'
-      + '<p class="hint" id="proNote" aria-live="polite"></p>'
-      + '<p class="hint">Know other photographers? Get your own link and earn 50% of every sale: <a href="mailto:sam@samsbench.com?subject=Family%20Formals%20Planner%20affiliate%20link">email us</a>.</p>'
-      + (w.length ? '<h3>Saved weddings</h3><ul class="people">' + w.map(function(x,i){ return '<li><span class="who">'+esc(x.title)+'<small>saved '+esc(x.saved)+'</small></span><button type="button" class="small" data-openw="'+i+'">Open</button><button type="button" class="small" data-delw="'+i+'" aria-label="Delete '+esc(x.title)+'">Delete</button></li>'; }).join('') + '</ul>' : '');
+      + '<div><label for="logoIn">Logo for the printed cards</label><input type="file" id="logoIn" accept="image/*"></div></div>'
+      + (PRO.logo ? '<p class="studio-row"><img src="'+PRO.logo+'" alt="Your logo"><button type="button" class="small" id="btnLogoDel">Remove logo</button></p>' : '')
+      + '<div class="after" style="margin-top:16px"><button type="button" class="primary" id="btnClientLink">Copy a blank link for your couple</button><button type="button" id="btnSaveW">Save this wedding</button><button type="button" id="btnNewW">New wedding</button></div>'
+      + '<p class="note" id="proNote" aria-live="polite"></p>'
+      + (w.length ? '<h3 style="font:600 20px var(--display);margin:16px 0 0">Saved weddings</h3><ul class="saved">' + w.map(function(x,i){ return '<li><span class="who"><b>'+esc(x.title)+'</b> <span style="font-size:14px">saved '+esc(x.saved)+'</span></span><button type="button" class="small" data-openw="'+i+'">Open</button><button type="button" class="icon" data-delw="'+i+'" aria-label="Delete '+esc(x.title)+'">&#10005;</button></li>'; }).join('') + '</ul>' : '');
   }
   $('proBody').innerHTML = h;
 }

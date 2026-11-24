@@ -437,8 +437,18 @@ function verifyLicense(email){
 var GC_CODE = 'familyformals';
 var WHOP_EV = {'tool-start': ['tool_start'], 'order-made': ['order_made'], 'send-photog': ['send_photog'], 'photog-open': ['photog_open'],
   'pro-view': ['view_content', {product_id: 'prod_ufUFnckIeVvR3'}], 'buy-click': ['initiate_checkout', {product_id: 'prod_ufUFnckIeVvR3', value: 19, currency: 'USD'}]};
+/* 11-24 (ads review): the source code must follow the visitor down the funnel, or no channel can be compared on buys.
+   SRC = this visit's ?via (or "aff" for an affiliate link), kept for the tab in sessionStorage; funnel events are sent twice:
+   once plain ("buy-click") and once with the source ("buy-click.wad1"). */
+var SRC = (function(){ try{
+  var q = new URLSearchParams(location.search), v = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
+  if(v){ sessionStorage.setItem('ffp.src', v); return v; }
+  return sessionStorage.getItem('ffp.src') || '';
+}catch(e){ return ''; } })();
+var FUNNEL_EV = {'example':1, 'tool-start':1, 'order-made':1, 'export-print':1, 'export-share':1, 'send-photog':1, 'pro-visit':1, 'photog-open':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1};
 function track(name, tries){
   try{
+    if(!tries && SRC && FUNNEL_EV[name]) track(name + '.' + SRC);
     if(!tries && window.whop && WHOP_EV[name]){ try{ window.whop.track(WHOP_EV[name][0], WHOP_EV[name][1]); }catch(e){} }   // Whop Pixel, once per call
     if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true});
     else if((tries||0) < 20) setTimeout(function(){ track(name, (tries||0) + 1); }, 500);   // count.js loads async; events fired at page load wait for it
@@ -1038,6 +1048,7 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
   var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
   if(via) track('via-' + via);
   if(af) track('aff-' + af);
+  if(q.get('for') === 'pro') track('pro-visit');   // photographer landing: the denominator for buy rates (couples never buy)
   if(q.get('bought')==='1' && !isPro()){
     setTimeout(function(){
       var ln = $('licNote'), lk = $('licKey');

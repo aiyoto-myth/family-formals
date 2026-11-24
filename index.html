@@ -323,7 +323,8 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
     <div class="stats" id="summary" aria-live="polite"></div>
     <div class="film"><div id="sheet"></div></div>
     <div class="after">
-      <button type="button" class="primary" id="btnPrint">Print call cards</button>
+      <button type="button" class="primary" id="btnPhotog">Send to your photographer</button>
+      <button type="button" id="btnPrint">Print call cards</button>
       <button type="button" id="btnShare">Copy share link</button>
       <button type="button" id="btnCopyText">Copy as text</button>
     </div>
@@ -388,6 +389,8 @@ var KEY = 'ffp.v1';
 
 /* ---------- Pro (Whop) ---------- */
 var SITE = 'https://aiyoto-myth.github.io/family-formals/';
+/* QR on printed cards -> SITE?via=card (made 11-24 with python qrcode, error level M). */
+var QR_CARD = '<svg viewBox="0 0 33 33" width="72" height="72" shape-rendering="crispEdges" role="img" aria-label="QR code for the free planner"><path d="M0 0h7v1h-7zM10 0h4v1h-4zM18 0h3v1h-3zM23 0h1v1h-1zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h1v1h-1zM13 1h6v1h-6zM20 1h1v1h-1zM22 1h1v1h-1zM24 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h4v1h-4zM13 2h1v1h-1zM16 2h1v1h-1zM18 2h5v1h-5zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM16 3h2v1h-2zM20 3h1v1h-1zM24 3h1v1h-1zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM13 4h1v1h-1zM15 4h1v1h-1zM17 4h4v1h-4zM22 4h3v1h-3zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h9v1h-9zM18 5h1v1h-1zM20 5h1v1h-1zM22 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM8 7h2v1h-2zM11 7h2v1h-2zM14 7h2v1h-2zM21 7h4v1h-4zM0 8h1v1h-1zM2 8h5v1h-5zM11 8h1v1h-1zM13 8h3v1h-3zM17 8h1v1h-1zM26 8h5v1h-5zM2 9h1v1h-1zM5 9h1v1h-1zM7 9h2v1h-2zM11 9h2v1h-2zM16 9h1v1h-1zM19 9h2v1h-2zM23 9h1v1h-1zM26 9h2v1h-2zM29 9h2v1h-2zM32 9h1v1h-1zM0 10h2v1h-2zM4 10h1v1h-1zM6 10h1v1h-1zM8 10h2v1h-2zM11 10h1v1h-1zM15 10h2v1h-2zM22 10h1v1h-1zM25 10h2v1h-2zM28 10h1v1h-1zM30 10h2v1h-2zM0 11h1v1h-1zM3 11h1v1h-1zM8 11h1v1h-1zM12 11h1v1h-1zM14 11h2v1h-2zM18 11h6v1h-6zM25 11h2v1h-2zM28 11h4v1h-4zM0 12h3v1h-3zM5 12h3v1h-3zM11 12h1v1h-1zM18 12h2v1h-2zM22 12h2v1h-2zM25 12h1v1h-1zM27 12h3v1h-3zM31 12h2v1h-2zM2 13h2v1h-2zM7 13h6v1h-6zM14 13h3v1h-3zM18 13h3v1h-3zM22 13h2v1h-2zM25 13h2v1h-2zM31 13h2v1h-2zM0 14h3v1h-3zM4 14h4v1h-4zM9 14h2v1h-2zM14 14h1v1h-1zM20 14h3v1h-3zM24 14h8v1h-8zM5 15h1v1h-1zM8 15h2v1h-2zM14 15h1v1h-1zM16 15h1v1h-1zM18 15h2v1h-2zM21 15h2v1h-2zM25 15h2v1h-2zM29 15h2v1h-2zM0 16h3v1h-3zM6 16h1v1h-1zM8 16h3v1h-3zM12 16h3v1h-3zM17 16h1v1h-1zM22 16h4v1h-4zM27 16h2v1h-2zM32 16h1v1h-1zM2 17h3v1h-3zM8 17h7v1h-7zM16 17h4v1h-4zM21 17h1v1h-1zM23 17h1v1h-1zM26 17h2v1h-2zM29 17h2v1h-2zM32 17h1v1h-1zM1 18h1v1h-1zM3 18h2v1h-2zM6 18h1v1h-1zM8 18h2v1h-2zM15 18h1v1h-1zM17 18h1v1h-1zM22 18h1v1h-1zM27 18h2v1h-2zM30 18h2v1h-2zM0 19h2v1h-2zM4 19h1v1h-1zM8 19h1v1h-1zM11 19h1v1h-1zM13 19h2v1h-2zM16 19h3v1h-3zM21 19h1v1h-1zM24 19h1v1h-1zM26 19h6v1h-6zM3 20h1v1h-1zM6 20h5v1h-5zM12 20h1v1h-1zM16 20h1v1h-1zM19 20h1v1h-1zM22 20h4v1h-4zM27 20h3v1h-3zM0 21h3v1h-3zM4 21h1v1h-1zM7 21h1v1h-1zM11 21h1v1h-1zM14 21h2v1h-2zM17 21h4v1h-4zM23 21h1v1h-1zM26 21h1v1h-1zM29 21h1v1h-1zM32 21h1v1h-1zM0 22h1v1h-1zM2 22h2v1h-2zM6 22h1v1h-1zM8 22h9v1h-9zM18 22h1v1h-1zM20 22h3v1h-3zM30 22h2v1h-2zM0 23h1v1h-1zM2 23h2v1h-2zM5 23h1v1h-1zM7 23h1v1h-1zM10 23h1v1h-1zM12 23h4v1h-4zM18 23h1v1h-1zM20 23h3v1h-3zM24 23h2v1h-2zM28 23h3v1h-3zM32 23h1v1h-1zM0 24h1v1h-1zM3 24h1v1h-1zM6 24h1v1h-1zM10 24h2v1h-2zM14 24h2v1h-2zM17 24h1v1h-1zM19 24h1v1h-1zM22 24h1v1h-1zM24 24h6v1h-6zM31 24h1v1h-1zM8 25h2v1h-2zM11 25h3v1h-3zM19 25h2v1h-2zM22 25h3v1h-3zM28 25h1v1h-1zM30 25h1v1h-1zM32 25h1v1h-1zM0 26h7v1h-7zM9 26h4v1h-4zM14 26h2v1h-2zM18 26h1v1h-1zM21 26h1v1h-1zM23 26h2v1h-2zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h2v1h-2zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM20 27h5v1h-5zM28 27h3v1h-3zM32 27h1v1h-1zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM8 28h2v1h-2zM11 28h2v1h-2zM15 28h1v1h-1zM18 28h1v1h-1zM20 28h1v1h-1zM22 28h1v1h-1zM24 28h6v1h-6zM31 28h1v1h-1zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h3v1h-3zM12 29h1v1h-1zM14 29h3v1h-3zM19 29h1v1h-1zM23 29h3v1h-3zM28 29h1v1h-1zM31 29h2v1h-2zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM8 30h2v1h-2zM12 30h2v1h-2zM20 30h2v1h-2zM26 30h2v1h-2zM29 30h2v1h-2zM0 31h1v1h-1zM6 31h1v1h-1zM9 31h1v1h-1zM11 31h2v1h-2zM16 31h1v1h-1zM21 31h2v1h-2zM25 31h2v1h-2zM28 31h1v1h-1zM30 31h1v1h-1zM0 32h7v1h-7zM8 32h3v1h-3zM12 32h1v1h-1zM14 32h1v1h-1zM17 32h1v1h-1zM20 32h1v1h-1zM22 32h4v1h-4zM27 32h1v1h-1zM31 32h1v1h-1z" fill="#000"/></svg>';
 var CHECKOUT_URL = 'https://whop.com/checkout/plan_GDLyKagMQ2oiF';   // Whop product prod_ufUFnckIeVvR3, $19 one-time; documented to credit ?a=<affiliate>
 var CHECKOUT_REDIRECT_URL = 'https://whop.com/checkout/ch_gywxy4KLpZVlaPx/';  // same plan, sends buyers back to ?bought=1 (used when no affiliate)
 var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';        // our Whop-hosted purchase check
@@ -423,7 +426,12 @@ function verifyLicense(email){
 }
 /* GoatCounter (account created 11-23, login in ~/.secrets/goatcounter.txt on the server). count.js sends path+query, never the #hash, so family names in share links stay private. */
 var GC_CODE = 'familyformals';
-function track(name){ try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true}); }catch(e){} }
+function track(name, tries){
+  try{
+    if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true});
+    else if((tries||0) < 20) setTimeout(function(){ track(name, (tries||0) + 1); }, 500);   // count.js loads async; events fired at page load wait for it
+  }catch(e){}
+}
 function getWeddings(){ try{ return JSON.parse(localStorage.getItem('ffp.weddings')||'[]'); }catch(e){ return []; } }
 function setWeddings(w){ try{ localStorage.setItem('ffp.weddings', JSON.stringify(w)); return true; }catch(e){ return false; } }
 
@@ -612,9 +620,14 @@ function b64u(bytes){ var s=''; for(var i=0;i<bytes.length;i++) s+=String.fromCh
 function unb64u(str){ str = str.replace(/-/g,'+').replace(/_/g,'/'); while(str.length%4) str+='='; var s = atob(str), b = new Uint8Array(s.length); for(var i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; }
 function studioName(){ return (isPro() && PRO.studio) ? PRO.studio : (S.studio || ''); }
 function packState(){ return JSON.stringify({v:1,a:S.a,b:S.b,people:S.people,apart:S.apart,shots:S.shots,disabled:S.disabled,known:S.known,start:S.start,per:S.per,seq:S.seq,studio:studioName()}); }
-function shareLink(json){
+/* Source codes (?via=) say which button a visit came from: couple = "Send to your photographer", share = "Copy share link",
+   card = QR on the printed cards, print / text = the "Made with" line. GoatCounter counts the path with its query. */
+function shareLink(json, via){
   json = json || packState();
-  var aff = affCode(), base = location.href.split('#')[0].split('?')[0] + (aff ? '?a=' + encodeURIComponent(aff) : '');
+  var aff = affCode(), qs = [];
+  if(aff) qs.push('a=' + encodeURIComponent(aff));
+  if(via) qs.push('via=' + via);
+  var base = location.href.split('#')[0].split('?')[0] + (qs.length ? '?' + qs.join('&') : '');
   if(window.CompressionStream){
     var cs = new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'));
     return new Response(cs).arrayBuffer().then(function(buf){ return base + '#z=' + b64u(new Uint8Array(buf)); });
@@ -781,7 +794,8 @@ function renderSheet(){
         + (r.next.length ? '<div>Call next: '+esc(names(r.next))+'</div>' : '')
         + '</div>';
     }).join('')
-    + (isPro() ? '' : '<p style="margin-top:10px;font-size:10pt">Made with Family Formals Planner, free at '+SITE+' · Photographers: put your studio logo on these cards at '+SITE+'?for=pro</p>');
+    + (isPro() ? '' : '<div style="display:flex;align-items:center;gap:12px;margin-top:10px;break-inside:avoid">' + QR_CARD
+      + '<p style="margin:0;font-size:10pt">Scan to plan your own family photos, free.<br>Made with Family Formals Planner · Photographers: put your studio logo on these cards at '+SITE+'?for=pro&amp;via=print</p></div>');
 }
 
 function renderAll(){
@@ -790,8 +804,11 @@ function renderAll(){
   $('startTime').value = S.start || '16:00'; $('perShot').value = S.per || 1.5;
   renderSides(); renderApart(); renderShots(); renderSheet(); renderPro();
   var st = $('studioNote');
-  if(S.studio && !isPro()){ st.hidden = false; st.textContent = S.studio + ' asked you to fill this in. Add your family below, then press "Copy share link" in step 04 and send the link back to them.'; }
+  if(S.studio && !isPro()){ st.hidden = false; st.textContent = S.studio + ' asked you to fill this in. Add your family below, then press "Send back to ' + S.studio + '" under the photo list.'; }
   else st.hidden = true;
+  $('btnPhotog').hidden = isPro();
+  $('btnPhotog').textContent = S.studio ? 'Send back to ' + S.studio : 'Send to your photographer';
+  $('btnPrint').className = isPro() ? 'primary' : '';
 }
 
 function renderPro(){
@@ -879,8 +896,26 @@ function nudge(msg){
   n.innerHTML = '<b>Photographers:</b> ' + esc(msg) + ' <a href="#proSection">See Pro</a>' + (url ? ' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">'+PRICE+' once</a>' : '');
 }
 $('btnPrint').addEventListener('click', function(){ renderSheet(); track('export-print'); window.print(); nudge('put your studio logo on these cards and drop the "Made with" line.'); });
+/* The couple sends the finished list to their photographer, who is the one Pro is for. Phone: the system share sheet; otherwise copy. */
+$('btnPhotog').addEventListener('click', function(){
+  var rows = runSheet();
+  if(!rows.length){ $('shareNote').textContent = 'Add your family first, then send the list.'; return; }
+  shareLink(null, 'couple').then(function(url){
+    var title = 'Family photos · ' + nameA() + ' & ' + nameB();
+    var text = 'Our family photo list for the wedding: ' + rows.length + ' photos, done by about ' + clock(rows.length) + '. Each photo says who steps in, who steps out and who can leave.';
+    track('send-photog');
+    var copied = function(){ $('shareNote').textContent = 'Copied. Paste it into your message to ' + (S.studio || 'your photographer') + '. The list lives inside the link; nothing is uploaded.'; };
+    if(navigator.share){
+      navigator.share({title: title, text: text, url: url}).then(function(){ $('shareNote').textContent = 'Sent. Your photographer opens the same list you see here.'; }, function(){});
+      return;
+    }
+    var all = text + '\n' + url;
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(all).then(copied, function(){ prompt('Copy this and send it to your photographer:', all); });
+    else prompt('Copy this and send it to your photographer:', all);
+  });
+});
 $('btnShare').addEventListener('click', function(){
-  shareLink().then(function(url){
+  shareLink(null, 'share').then(function(url){
     var done = function(){ $('shareNote').textContent = 'Link copied. Anyone who opens it sees this exact list (nothing is uploaded; the list lives inside the link).'; track('export-share'); nudge('send every couple a link with your studio name, and keep every wedding saved.'); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function(){ prompt('Copy this link:', url); });
     else prompt('Copy this link:', url);
@@ -894,7 +929,7 @@ $('btnCopyText').addEventListener('click', function(){
     if(r.out.length) txt += '  Step out: '+names(r.out)+'\n';
     if(r.free.length) txt += '  Free to go: '+names(r.free)+'\n';
   });
-  if(!isPro()) txt += '\nMade with Family Formals Planner, free at '+SITE+'\nPhotographers: put your studio logo on these cards: '+SITE+'?for=pro\n';
+  if(!isPro()) txt += '\nMade with Family Formals Planner, free at '+SITE+'?via=text\nPhotographers: put your studio logo on these cards: '+SITE+'?for=pro&via=text\n';
   var ok = function(){ $('shareNote').textContent = 'Run sheet copied as text.'; };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, function(){ prompt('Copy:', txt); }); else prompt('Copy:', txt);
 });
@@ -985,6 +1020,10 @@ load(); loadPro(); affCode();
 if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://'+GC_CODE+'.goatcounter.com/count'); document.head.appendChild(gs); }
 (function(){
   var q = new URLSearchParams(location.search);
+  /* GoatCounter keeps the path without its query, so each source code is also counted as an event: via-<code>, aff-<username>. */
+  var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  if(via) track('via-' + via);
+  if(af) track('aff-' + af);
   if(q.get('bought')==='1' && !isPro()){
     setTimeout(function(){
       var ln = $('licNote'), lk = $('licKey');
@@ -1007,7 +1046,21 @@ readHash().then(function(o){
   if(o && o.v===1){
     S = Object.assign(blank(), o); save();
     history.replaceState(null,'',location.href.split('#')[0]);
-    if(S.people.length){ var n = $('loadedNote'); n.hidden = false; n.textContent = 'Opened a shared list for ' + nameA() + ' & ' + nameB() + '. Changes you make stay on this device until you share a new link.'; }
+    if(!S.shots.length && S.people.length) rebuild();
+    var n = $('loadedNote');
+    if(S.people.length && !isPro() && new URLSearchParams(location.search).get('via') === 'couple'){
+      /* A couple sent this from "Send to your photographer": the reader is most likely their photographer, the one Pro is for. */
+      var rows = runSheet(), url = buyUrl();
+      n.hidden = false; n.className = 'notice photog';
+      n.innerHTML = '<p style="margin:0 0 8px"><b>' + esc(nameA()) + ' &amp; ' + esc(nameB()) + ' sent you their family photo list.</b> '
+        + rows.length + ' photos, done by about ' + clock(rows.length) + '. Scroll down for every photo: who steps in, who steps out, who can leave.</p>'
+        + '<p style="margin:0 0 12px">Photographers: send every couple a link with your studio name, and the call cards they print carry your logo. Pro is ' + PRICE + ' once.</p>'
+        + '<p style="margin:0">' + (url ? '<a class="btn primary" data-buy="1" href="' + esc(url) + '" target="_blank" rel="noopener">Get Pro, ' + PRICE + ' once</a> ' : '') + '<a class="btn" href="#proSection">What Pro does</a></p>';
+      /* first thing they see: in the hero, in place of the couple's "see an example / start" buttons */
+      var hero = document.querySelector('.hero > div'), cta = hero && hero.querySelector('.cta');
+      if(cta){ hero.insertBefore(n, cta); cta.style.display = 'none'; var pf = hero.querySelector('.facts'); if(pf) pf.style.display = 'none'; }
+      track('photog-open');
+    } else if(S.people.length){ n.hidden = false; n.textContent = 'Opened a shared list for ' + nameA() + ' & ' + nameB() + '. Changes you make stay on this device until you share a new link.'; }
   }
   if(!S.shots.length && S.people.length) rebuild();
   renderAll();

@@ -350,7 +350,7 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
     <div class="pro">
       <div>
         <h2 id="h5s">For photographers: Pro</h2>
-        <p class="price">14 days free<small>then $99 a year, or $39 for 5 weddings</small></p>
+        <p class="price">From $39<small>5 weddings for $39, or unlimited for $99 a year with 14 days free</small></p>
         <p style="margin:12px 0 0">Everything above stays free for couples and photographers. Pro is for photographers who use it at every wedding.</p>
       </div>
       <div id="proBody"></div>
@@ -377,6 +377,7 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
 
   <footer>
     <span>Family Formals: the order is worked out so people leave as early as possible, people who need to go first are done first, and as few people as possible walk in and out between photos. You can still move any photo.</span>
+    <span><a href="guides/">Guides: family photo lists, order and timing</a> · Questions or refunds: <a href="mailto:sam@samsbench.com">sam@samsbench.com</a></span>
   </footer>
 </main>
 
@@ -413,7 +414,7 @@ var PRICE = '$19';
 /* 11-24 user: three ways to buy Pro. Founding $19 lifetime (first 50, Whop stock), Studio $99/year with a 14-day trial (card up front),
    5-wedding pack $39 counted on this device. Gift codes stay lifetime. Affiliate links (?a=) go to the plain plan checkout. */
 var PLANS = {
-  year:     {name:'Studio', price:'$99 a year', sub:'First 14 days free, then $99 a year. Unlimited weddings. Cancel anytime.', plan:'plan_Z3V2NN6yyE4M4', ch:'https://whop.com/checkout/ch_FR6XnOlEbmnD8vq/'},
+  year:     {name:'Studio', price:'$99 a year', sub:'First 14 days free (card needed), then $99 a year. Unlimited weddings. Cancel anytime.', plan:'plan_Z3V2NN6yyE4M4', ch:'https://whop.com/checkout/ch_FR6XnOlEbmnD8vq/'},
   pack5:    {name:'5-wedding pack', price:'$39 once', sub:'Pro for your next 5 weddings. No subscription.', plan:'plan_Tb9AuY4CQr0Uw', ch:'https://whop.com/checkout/ch_rdKrQoAb0pjFCA9/'},
   lifetime: {name:'Founding price', price:'$19 once', sub:'Lifetime Pro. Only for the first 50 photographers.', plan:'plan_GDLyKagMQ2oiF', ch:'https://whop.com/checkout/ch_bM9KtNFW3yT7fZN/'}
 };
@@ -423,7 +424,7 @@ var PRO = {key:'', studio:'', logo:''};
 function loadPro(){ try{ var t = localStorage.getItem('ffp.pro'); if(t) PRO = Object.assign(PRO, JSON.parse(t)); }catch(e){} }
 function savePro(){ try{ localStorage.setItem('ffp.pro', JSON.stringify(PRO)); }catch(e){} }
 function weddingId(){ var a = (S.a && S.a.name) || '', b = (S.b && S.b.name) || ''; try{ a = nameA(); b = nameB(); }catch(e){} return (a + '&' + b).toLowerCase().replace(/\s+/g, ' ').trim(); }
-function packLeft(){ return PACK_SIZE - (PRO.used || []).length; }
+function packLeft(){ return PACK_SIZE * Math.max(1, +PRO.packs || 1) - (PRO.used || []).length; }
 /* A pack wedding is used the first time its cards are printed or shared with Pro branding; reopening the same couple is free. */
 function isPro(){
   if(!PRO.key) return false;
@@ -434,7 +435,7 @@ function usePack(){
   if(PRO.kind !== 'pack5' || !PRO.key) return;
   var id = weddingId(); if(!id || id === '&') return;
   PRO.used = PRO.used || [];
-  if(PRO.used.indexOf(id) < 0 && PRO.used.length < PACK_SIZE){ PRO.used.push(id); savePro(); }
+  if(PRO.used.indexOf(id) < 0 && packLeft() > 0){ PRO.used.push(id); savePro(); try{ renderPro(); }catch(e){} }
 }
 function affCode(){
   var a = '';
@@ -463,7 +464,10 @@ function verifyLicense(email){
 /* GoatCounter (account created 11-23, login in ~/.secrets/goatcounter.txt on the server). count.js sends path+query, never the #hash, so family names in share links stay private. */
 var GC_CODE = 'familyformals';
 var WHOP_EV = {'tool-start': ['tool_start'], 'order-made': ['order_made'], 'send-photog': ['send_photog'], 'photog-open': ['photog_open'],
-  'pro-view': ['view_content', {product_id: 'prod_ufUFnckIeVvR3'}], 'buy-click': ['initiate_checkout', {product_id: 'prod_ufUFnckIeVvR3', value: 19, currency: 'USD'}]};
+  'pro-view': ['view_content', {product_id: 'prod_ufUFnckIeVvR3'}], 'buy-click': ['initiate_checkout', {product_id: 'prod_ufUFnckIeVvR3'}],
+  'buy-year': ['add_to_cart', {variant_id: 'plan_Z3V2NN6yyE4M4', product_id: 'prod_ufUFnckIeVvR3', value: 99, currency: 'USD'}],
+  'buy-pack5': ['add_to_cart', {variant_id: 'plan_Tb9AuY4CQr0Uw', product_id: 'prod_ufUFnckIeVvR3', value: 39, currency: 'USD'}],
+  'buy-lifetime': ['add_to_cart', {variant_id: 'plan_GDLyKagMQ2oiF', product_id: 'prod_ufUFnckIeVvR3', value: 19, currency: 'USD'}]};
 /* 11-24 (ads review): the source code must follow the visitor down the funnel, or no channel can be compared on buys.
    SRC = this visit's ?via (or "aff" for an affiliate link), kept for the tab in sessionStorage; funnel events are sent twice:
    once plain ("buy-click") and once with the source ("buy-click.wad1"). */
@@ -473,12 +477,21 @@ var SRC = (function(){ try{
   return sessionStorage.getItem('ffp.src') || '';
 }catch(e){ return ''; } })();
 var FUNNEL_EV = {'example':1, 'tool-start':1, 'order-made':1, 'export-print':1, 'export-share':1, 'send-photog':1, 'pro-visit':1, 'photog-open':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1};
+/* 11-24: GoatCounter rate-limits ~4 hits a second per visitor and silently drops the rest (bizz-handbell measured it),
+   and a page load here fires 4+ events at once. So events wait in a queue and go out 700 ms apart once count.js is up. */
+var GCQ = [], GC_BUSY = false, GC_WAIT = 0;
+function gcPump(){
+  if(GC_BUSY || !GCQ.length) return;
+  if(!(window.goatcounter && window.goatcounter.count)){ if(GC_WAIT++ < 40) setTimeout(gcPump, 500); return; }
+  GC_BUSY = true;
+  try{ var n = GCQ.shift(); window.goatcounter.count({path: n, title: n, event: true}); }catch(e){}
+  setTimeout(function(){ GC_BUSY = false; gcPump(); }, 700);
+}
 function track(name, tries){
   try{
     if(!tries && SRC && FUNNEL_EV[name]) track(name + '.' + SRC);
     if(!tries && window.whop && WHOP_EV[name]){ try{ window.whop.track(WHOP_EV[name][0], WHOP_EV[name][1]); }catch(e){} }   // Whop Pixel, once per call
-    if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true});
-    else if((tries||0) < 20) setTimeout(function(){ track(name, (tries||0) + 1); }, 500);   // count.js loads async; events fired at page load wait for it
+    GCQ.push(name); gcPump();
   }catch(e){}
 }
 function getWeddings(){ try{ return JSON.parse(localStorage.getItem('ffp.weddings')||'[]'); }catch(e){ return []; } }
@@ -734,13 +747,13 @@ function renderHero(){
   function L(spec){ var r = []; spec.split('').forEach(function(ch){ r.push(ch==='k' ? {kind:'a', name:'', kid:true} : {kind: ch==='c' ? 'c' : ch, name:''}); }); return r; }
   var demo = [
     ['1', 'Everyone on Emma\'s side', '4:00 PM', 'aaakaaacc', 'Aunt Sue, Uncle Bob'],
-    ['3', 'Emma\'s grandparents', '4:03 PM', 'acc', 'Grandma June'],
-    ['12', 'Both sets of parents, with Carol', '4:17 PM', 'accbb', '']
+    ['3', 'Emma\'s grandparents', '4:04 PM', 'acc', 'Grandma June'],
+    ['12', 'Both sets of parents, with Carol', '4:22 PM', 'accbb', '']
   ];
   el.innerHTML = demo.map(function(d){
     return '<div class="pcard" style="margin:0 0 14px"><div class="ph"><span class="pn">'+d[0]+'</span><span class="pt">'+esc(d[1])+'</span><span class="tm">'+d[2]+'</span></div>'
       + '<div class="figs">'+figSVG(L(d[3]))+'</div>'
-      + (d[4] ? '<div class="line free"><span class="k">Free to go</span> '+esc(d[4])+'</div>' : '<div class="line"><span class="k">Step in</span> James\'s parents</div>')
+      + (d[4] ? '<div class="line free"><span class="k">Free to go</span> '+esc(d[4])+'</div>' : '<div class="line"><span class="k">Step in</span> Carol and Emma</div>')
       + '</div>';
   }).join('');
   el.lastChild.style.marginBottom = '0';
@@ -869,14 +882,15 @@ function renderPro(){
       + '<div class="plans">' + ['year', 'pack5', 'lifetime'].filter(function(k){ return k !== 'lifetime' || FOUNDING_OPEN; }).map(function(k){ var P = PLANS[k];
           return '<div class="plan' + (k === 'year' ? ' best' : '') + '"><b>' + P.name + '</b><span class="pp">' + P.price + '</span><span class="ps">' + P.sub + '</span>'
             + '<a class="btn' + (k === 'year' ? ' primary' : '') + '" data-buy="1" data-plan="' + k + '" href="' + esc(buyUrl(k)) + '" target="_blank" rel="noopener">' + (k === 'year' ? 'Start 14 days free' : 'Get ' + P.name) + '</a></div>'; }).join('') + '</div>'
-      + '<p style="margin:8px 0 0;font-size:15px">30-day refund on every plan: just reply to your receipt.</p>'
+      + '<p style="margin:8px 0 0;font-size:15px">Prices in US dollars; checkout may show your own currency. 30-day refund on every plan: email sam@samsbench.com.</p>'
+      + (PRO.lapsed ? '<p class="notice" style="margin-top:12px">Your Studio plan has ended, so Pro is off on this device. Restart it above, or enter your email again if you have renewed.</p>' : '')
       + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Enter the email you paid with, or your gift code</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@studio.com or GIFT-CODE"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
       + '<p class="note" id="licNote" aria-live="polite"></p>';
   } else {
     var w = getWeddings();
     h += '<p style="margin:0 0 14px;font-weight:600">Pro is unlocked on this device. Thank you.'
       + (PRO.kind === 'pack5' ? ' <span style="font-weight:400">5-wedding pack: ' + Math.max(0, packLeft()) + ' of 5 left.' + (packLeft() <= 0 ? ' <a href="' + esc(buyUrl('year')) + '" target="_blank" rel="noopener" data-buy="1" data-plan="year">Go unlimited, $99 a year</a> or <a href="' + esc(buyUrl('pack5')) + '" target="_blank" rel="noopener" data-buy="1" data-plan="pack5">another pack</a>.' : '') + '</span>'
-         : PRO.kind === 'year' ? ' <span style="font-weight:400">Studio plan' + (PRO.until ? ', paid until ' + esc(String(PRO.until).slice(0, 10)) : '') + '.</span>' : '')
+         : PRO.kind === 'year' ? ' <span style="font-weight:400">Studio plan' + (PRO.until ? (PRO.trial ? ', free trial until ' : ', paid until ') + esc(String(PRO.until).slice(0, 10)) : '') + '.</span>' : '')
       + '</p>'
       + '<div class="row"><div><label for="studioIn">Studio name</label><input type="text" id="studioIn" value="'+esc(PRO.studio)+'" autocomplete="off"></div>'
       + '<div><label for="logoIn">Logo for the printed cards</label><input type="file" id="logoIn" accept="image/*"></div></div>'
@@ -970,6 +984,7 @@ $('btnPhotog').addEventListener('click', function(){
   });
 });
 $('btnShare').addEventListener('click', function(){
+  usePack();
   shareLink(null, 'share').then(function(url){
     var done = function(){ $('shareNote').textContent = 'Link copied. Anyone who opens it sees this exact list (nothing is uploaded; the list lives inside the link).'; track('export-share'); nudge('send every couple a link with your studio name, and keep every wedding saved.'); };
     if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function(){ prompt('Copy this link:', url); });
@@ -977,6 +992,7 @@ $('btnShare').addEventListener('click', function(){
   });
 });
 $('btnCopyText').addEventListener('click', function(){
+  usePack();
   var rows = runSheet(), txt = 'Family photos - '+nameA()+' & '+nameB()+'\n';
   rows.forEach(function(r){
     txt += '\n#'+(r.k+1)+' '+clock(r.k)+' - '+r.shot.label+'\n  In photo: '+names(r.frame)+'\n';
@@ -1027,8 +1043,8 @@ document.addEventListener('click', function(e){
     }
     verifyLicense(k.toLowerCase()).then(function(j){
       t.disabled = false;
-      if(j.valid){ PRO.key = k.toLowerCase(); PRO.kind = j.kind || 'lifetime'; PRO.until = j.until || ''; PRO.checked = Date.now(); savePro(); track('pro-unlocked'); track('pro-unlocked-' + PRO.kind); renderAll(); say('Pro unlocked'); }
-      else $('licNote').textContent = 'No Pro purchase found for that email. Use the email from your Whop receipt; if it still fails, reply to the receipt and we will sort it out.';
+      if(j.valid){ PRO.key = k.toLowerCase(); PRO.kind = j.kind || 'lifetime'; PRO.until = j.until || ''; PRO.trial = !!j.trial; PRO.packs = j.packs || 1; PRO.lapsed = false; PRO.checked = Date.now(); savePro(); track('pro-unlocked'); track('pro-unlocked-' + PRO.kind); renderAll(); say('Pro unlocked'); }
+      else $('licNote').textContent = 'No Pro purchase found for that email. Use the email from your Whop receipt; if it still fails, email sam@samsbench.com and we will sort it out.';
     }, function(){ t.disabled = false; $('licNote').textContent = 'Could not check right now. Check your internet connection and try again in a minute.'; });
     return;
   }
@@ -1075,10 +1091,10 @@ document.addEventListener('change', function(e){
 load(); loadPro(); affCode();
 (function(){
   var DAY = 864e5;
-  if(PRO.key && PRO.kind === 'year' && PRO.key.indexOf('@') > 0 && Date.now() - (PRO.checked || 0) > 30 * DAY){
+  if(PRO.key && PRO.kind === 'year' && PRO.key.indexOf('@') > 0 && Date.now() - (PRO.checked || 0) > (PRO.trial ? 1 : 30) * DAY){
     verifyLicense(PRO.key).then(function(j){
-      if(j.valid){ PRO.kind = j.kind || PRO.kind; PRO.until = j.until || ''; PRO.checked = Date.now(); savePro(); }
-      else { PRO.key = ''; PRO.kind = ''; savePro(); track('pro-lapsed'); renderAll(); say('Your Studio plan has ended. Renew to keep Pro.'); }
+      if(j.valid){ PRO.kind = j.kind || PRO.kind; PRO.until = j.until || ''; PRO.trial = !!j.trial; PRO.packs = j.packs || PRO.packs; PRO.checked = Date.now(); savePro(); }
+      else { PRO.key = ''; PRO.kind = ''; PRO.lapsed = true; savePro(); track('pro-lapsed'); renderAll(); say('Your Studio plan has ended. Renew to keep Pro.'); }
     }, function(){ if(Date.now() - (PRO.checked || 0) > 44 * DAY){ PRO.key = ''; savePro(); renderAll(); } });
   }
   try{
@@ -1116,6 +1132,10 @@ document.addEventListener('click', function(e){
 });
 readHash().then(function(o){
   if(o && o.v===1){
+    var mine = S.people.length && JSON.stringify(S.people) !== JSON.stringify(o.people || []);
+    if(mine && !confirm('Open the list in this link? It replaces the list you have on this device.' + (isPro() ? ' (Save it under Saved weddings first if you need it.)' : ''))){
+      history.replaceState(null,'',location.href.split('#')[0]); return;
+    }
     S = Object.assign(blank(), o); save();
     history.replaceState(null,'',location.href.split('#')[0]);
     if(!S.shots.length && S.people.length) rebuild();

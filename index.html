@@ -794,7 +794,8 @@ function renderSheet(){
         + (r.next.length ? '<div>Call next: '+esc(names(r.next))+'</div>' : '')
         + '</div>';
     }).join('')
-    + (isPro() ? '' : '<div style="display:flex;align-items:center;gap:12px;margin-top:10px;break-inside:avoid">' + QR_CARD
+    + (isPro() ? '<p style="margin:10px 0 0;font-size:8pt;opacity:.75">'+(PRO.studio ? esc(PRO.studio)+' · ' : '')+'planned with Family Formals · '+SITE.replace(/^https?:\/\//,'')+'?via=print-pro</p>'   /* 11-24 user: Pro cards keep one small credit line (was: nothing) */
+      : '<div style="display:flex;align-items:center;gap:12px;margin-top:10px;break-inside:avoid">' + QR_CARD
       + '<p style="margin:0;font-size:10pt">Scan to plan your own family photos, free.<br>Made with Family Formals Planner · Photographers: put your studio logo on these cards at '+SITE+'?for=pro&amp;via=print</p></div>');
 }
 
@@ -815,7 +816,7 @@ function renderPro(){
   var h = '';
   if(!isPro()){
     var url = buyUrl();
-    h += '<ul class="feat"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name for every couple, so they fill in their family before the day</li><li>Every wedding saved on this device, one click to switch</li><li>No "Made with" line on anything you print or copy</li></ul>'
+    h += '<ul class="feat"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name for every couple, so they fill in their family before the day</li><li>Every wedding saved on this device, one click to switch</li><li>No QR code or free-version footer on your cards, just one small credit line under your studio name</li></ul>'
       + (url ? '<p style="margin:22px 0 6px"><a class="btn primary" data-buy="1" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro, '+PRICE+' once</a></p><p style="margin:0;font-size:15px">One payment, no subscription. 30-day refund: just reply to your receipt.</p>'
              : '<p class="notice" style="margin-top:20px">Pro goes on sale in a few days. Everything else works now.</p>')
       + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Enter the email you paid with, or your gift code</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@studio.com or GIFT-CODE"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
@@ -895,7 +896,7 @@ function nudge(msg){
   n.hidden = false;
   n.innerHTML = '<b>Photographers:</b> ' + esc(msg) + ' <a href="#proSection">See Pro</a>' + (url ? ' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">'+PRICE+' once</a>' : '');
 }
-$('btnPrint').addEventListener('click', function(){ renderSheet(); track('export-print'); window.print(); nudge('put your studio logo on these cards and drop the "Made with" line.'); });
+$('btnPrint').addEventListener('click', function(){ renderSheet(); track('export-print'); window.print(); nudge('put your studio name and logo on these cards.'); });
 /* The couple sends the finished list to their photographer, who is the one Pro is for. Phone: the system share sheet; otherwise copy. */
 $('btnPhotog').addEventListener('click', function(){
   var rows = runSheet();
@@ -930,6 +931,7 @@ $('btnCopyText').addEventListener('click', function(){
     if(r.free.length) txt += '  Free to go: '+names(r.free)+'\n';
   });
   if(!isPro()) txt += '\nMade with Family Formals Planner, free at '+SITE+'?via=text\nPhotographers: put your studio logo on these cards: '+SITE+'?for=pro&via=text\n';
+  else txt += '\n'+(PRO.studio ? PRO.studio+' - ' : '')+'planned with Family Formals: '+SITE+'?via=text-pro\n';   // 11-24 user: Pro keeps one small credit line
   var ok = function(){ $('shareNote').textContent = 'Run sheet copied as text.'; };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, function(){ prompt('Copy:', txt); }); else prompt('Copy:', txt);
 });

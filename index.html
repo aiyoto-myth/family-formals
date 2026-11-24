@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Whop Pixel (11-24: Whop requires it before an ad may land here; user chose "改了再跑" for the $20 credit ad).
+     Not loaded when the page opens with a #hash: share links carry the family list in the hash, and it must never leave the device. -->
+<script>
+if(!location.hash){
+!function(w,d,s,u,n,a,b){if(w[n])return;a=w[n]={q:[],t:+new Date,s:[],o:u,track:function(){a.q.push([+new Date].concat([].slice.call(arguments)))},setScope:function(){a.s=[].slice.call(arguments).filter(function(x){return typeof x==="string"});a.q.push([+new Date,"setScope"].concat(a.s))},scope:function(){var c=[].slice.call(arguments);return{track:function(){a.q.push([+new Date].concat([].slice.call(arguments)).concat([{__scope:c}]))}}}};b=d.createElement(s);b.async=1;b.src=u+"/s.js";d.getElementsByTagName(s)[0].parentNode.insertBefore(b,d.getElementsByTagName(s)[0])}(window,document,"script","https://t.whop.tw","whop");
+whop.setScope("biz_QeeUtpAppQqYGr");
+whop.track("page");
+}
+</script>
 <title>Wedding Family Photo List &amp; Order Planner (Free) | Family Formals Planner</title>
 <meta name="description" content="Free wedding family photo list planner. Enter the family once and get the best order for the family formals, who to call next, and who is free to go. Handles divorced parents. No sign-up.">
 <link rel="canonical" href="https://samsbench.com/family-formals/">
@@ -426,8 +435,11 @@ function verifyLicense(email){
 }
 /* GoatCounter (account created 11-23, login in ~/.secrets/goatcounter.txt on the server). count.js sends path+query, never the #hash, so family names in share links stay private. */
 var GC_CODE = 'familyformals';
+var WHOP_EV = {'tool-start': ['tool_start'], 'order-made': ['order_made'], 'send-photog': ['send_photog'], 'photog-open': ['photog_open'],
+  'pro-view': ['view_content', {product_id: 'prod_ufUFnckIeVvR3'}], 'buy-click': ['initiate_checkout', {product_id: 'prod_ufUFnckIeVvR3', value: 19, currency: 'USD'}]};
 function track(name, tries){
   try{
+    if(!tries && window.whop && WHOP_EV[name]){ try{ window.whop.track(WHOP_EV[name][0], WHOP_EV[name][1]); }catch(e){} }   // Whop Pixel, once per call
     if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true});
     else if((tries||0) < 20) setTimeout(function(){ track(name, (tries||0) + 1); }, 500);   // count.js loads async; events fired at page load wait for it
   }catch(e){}

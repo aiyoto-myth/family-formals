@@ -239,6 +239,11 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
   #printSheet .pc{border:2px solid #000;border-radius:8px;padding:8px 12px;margin:0 0 8px;break-inside:avoid}
   #printSheet .pc b.n{font-size:20pt}
 }
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:20px 0 6px}
+.plan{border:1px solid var(--line, #ddd);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.plan.best{border-width:2px}
+.plan .pp{font-size:22px;font-weight:700}.plan .ps{font-size:14px;flex:1}
+.plan .btn{text-align:center;margin-top:6px}
 </style>
 </head>
 <body>
@@ -345,7 +350,7 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
     <div class="pro">
       <div>
         <h2 id="h5s">For photographers: Pro</h2>
-        <p class="price">$19<small>once, every wedding</small></p>
+        <p class="price">14 days free<small>then $99 a year, or $39 for 5 weddings</small></p>
         <p style="margin:12px 0 0">Everything above stays free for couples and photographers. Pro is for photographers who use it at every wedding.</p>
       </div>
       <div id="proBody"></div>
@@ -405,10 +410,32 @@ var CHECKOUT_REDIRECT_URL = 'https://whop.com/checkout/ch_bM9KtNFW3yT7fZN/';  //
 var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';        // our Whop-hosted purchase check
 var APP_KEY = 'family-formals';
 var PRICE = '$19';
+/* 11-24 user: three ways to buy Pro. Founding $19 lifetime (first 50, Whop stock), Studio $99/year with a 14-day trial (card up front),
+   5-wedding pack $39 counted on this device. Gift codes stay lifetime. Affiliate links (?a=) go to the plain plan checkout. */
+var PLANS = {
+  year:     {name:'Studio', price:'$99 a year', sub:'First 14 days free, then $99 a year. Unlimited weddings. Cancel anytime.', plan:'plan_Z3V2NN6yyE4M4', ch:'https://whop.com/checkout/ch_FR6XnOlEbmnD8vq/'},
+  pack5:    {name:'5-wedding pack', price:'$39 once', sub:'Pro for your next 5 weddings. No subscription.', plan:'plan_Tb9AuY4CQr0Uw', ch:'https://whop.com/checkout/ch_rdKrQoAb0pjFCA9/'},
+  lifetime: {name:'Founding price', price:'$19 once', sub:'Lifetime Pro. Only for the first 50 photographers.', plan:'plan_GDLyKagMQ2oiF', ch:'https://whop.com/checkout/ch_bM9KtNFW3yT7fZN/'}
+};
+var FOUNDING_OPEN = true;   // turned off when Whop no longer lists the founding plan (sold out)
+var PACK_SIZE = 5;
 var PRO = {key:'', studio:'', logo:''};
 function loadPro(){ try{ var t = localStorage.getItem('ffp.pro'); if(t) PRO = Object.assign(PRO, JSON.parse(t)); }catch(e){} }
 function savePro(){ try{ localStorage.setItem('ffp.pro', JSON.stringify(PRO)); }catch(e){} }
-function isPro(){ return !!PRO.key; }
+function weddingId(){ var a = (S.a && S.a.name) || '', b = (S.b && S.b.name) || ''; try{ a = nameA(); b = nameB(); }catch(e){} return (a + '&' + b).toLowerCase().replace(/\s+/g, ' ').trim(); }
+function packLeft(){ return PACK_SIZE - (PRO.used || []).length; }
+/* A pack wedding is used the first time its cards are printed or shared with Pro branding; reopening the same couple is free. */
+function isPro(){
+  if(!PRO.key) return false;
+  if(PRO.kind === 'pack5'){ var id = weddingId(); return packLeft() > 0 || (PRO.used || []).indexOf(id) >= 0; }
+  return true;
+}
+function usePack(){
+  if(PRO.kind !== 'pack5' || !PRO.key) return;
+  var id = weddingId(); if(!id || id === '&') return;
+  PRO.used = PRO.used || [];
+  if(PRO.used.indexOf(id) < 0 && PRO.used.length < PACK_SIZE){ PRO.used.push(id); savePro(); }
+}
 function affCode(){
   var a = '';
   try{ a = new URLSearchParams(location.search).get('a') || ''; }catch(e){}
@@ -417,7 +444,7 @@ function affCode(){
   return a;
 }
 /* Whop referral links use ?a=<affiliate username>; we pass it straight through to checkout. */
-function buyUrl(){ var a = affCode(); return a ? CHECKOUT_URL + '?a=' + encodeURIComponent(a) : CHECKOUT_REDIRECT_URL; }
+function buyUrl(kind){ var P = PLANS[kind || 'year'], a = affCode(); return a ? 'https://whop.com/checkout/' + P.plan + '?a=' + encodeURIComponent(a) : P.ch; }
 /* Gift codes for creators: only SHA-256 fingerprints live here; the codes themselves are in outreach/gift_codes.json (not published). */
 var GIFT_SHA256 = ['daba0bd853dece12cc1046b9f91647a1d14007f9ec1257ab6abc56dd39fb191c','0ee381ad0acca5ee196c301725abc049393353b0f0dfac821b8ef8add1b9f4ec','5502108c079b8f20f8aa17fa1daa314fc87202ba408fec951b977fd20714cd8c','679b5b205badbfe53833132be0b45c26b37128802741c38ef10e9da26cc88d8f','44cf3c2dbe7e1cda7e1404df25e91e809e99bd622820d2ddcd5dad346652eefa','876628f1bd7d99828afe04839265801abddd6e73c949ff2d7cfc7383bfd4edb9','dce2117aebc2add347a8dc8124e66c2b2b540bd6291ee7a8eefa14da328a6361','4efd578e7a7fd284b4a5224c936d4c182ce7ae2fe6c9e90d58cf16c76ac8ca90','7b11c43b6a6862c7699a71d3f816e567b9892f54d7ca82e8416fd0436cb28a10','92ba0f4466d9fb7616dc174e94d4e6b775899781626e4befb36e15cf13f1bbfa','667333d14fa35a0d01023d4ce1ee70b144e3b92e6a700c711734c3ae887ffa01','61648d5f911194f2d0d81d6063373de0fb6d5e1188c64f9e1af2addcaac1b6e4','22365e3edececd14d2dd9f3c8e5ac146ae32679507f36c07c9e2e7370dd7bf4b','0387516730ceec1610fcc609720bfafa17bd07699ba05a74563eb59b9a641c51','1712041d2261282c7b3c2fef271e9e5df0b71fe5a3ee3fa029376f03b3914069','ccb181b3791108ba915e446908eeb8bb9404dd549a789694080d69d695baa60e','aed5c1f936607ebf2009f29e014e9f114fea14b320c024387067724744dbde01','460fdf615c0d485a4436e439284c97fb1d44465211f628848f93bad75d7ff609','1efd91098c106fd6a0e7a22cc7b47e66c1317ddbab8c8054ceff92c2fe522ceb','10d475c102b4c946803c80c0a088208d796ac9208c380c5dc953514843d07b4c','ebe0c7a0dcb007de6fadfd9c4eb7ab5b0396d5018700e8874870929505156189','769476b74bbe674f46aba25161c2e76a42974851286104f621f8756116268373','fa5e8eafe38e40d01cf1ce12b9032994fa79d8a0ab10a2e0bd6a82e745176268','251122ae543b09cba2c28af78023dd9a53e7b3ddfd91a73428dba6d72ec97b0e','674776a40d66578ab94849f8af2b97a1b261c410533be6891afd1888ffc6c164','9322346f019935d640eb4915432bdc435015a7fc2793bd53f9491d69562574be','cb03a42dfc82edddd940f058549f0341dc71be2882e912e05c587b4a01393ca1','1e199f11d946c77b6b7db52902cb7987160ff27bfc637f6863b1a501889a318b','baef3305c57243ad34410aa1af2df606ec71484f9a761a71b084ab0f707af911','4c35c13650fe6f54d87b13325d5fac559bf599589f6975060eb191a39e4c67b1','9dbab7b3a21e4813814c54c3179013b50c839ce89f6945a9d7fe918032f13283','22c8daef73eb8c3eaabd0daf015a8b04ac314afb8f6480364a2638b359c23571','bbca6dac3bbee0a403587b877db9ffc6a87b7a220b3da679004cdaf9ed405c4e','449eef448be48288cc7c57a0278cf56b9cdfc218d7532fc692218099190abebd','7f325c5bac83a52a0ed914f6cc78bfb30b5275d3383516198776ebd2b99f44cb','57b358b8309c274591fe387b2463122444cf7b102672327fdd74092f7ae8ae18','6f3ffe1bea356e3b41ef2df4c909cd21fcb03c2be9bc3e33bc51a0eebba1c984','3f0a3a0cbcd1c534558284c970d7f23b75501974e90d5c67104a11c15cdd8357','a2a899c90633d5878b1aa74bf3f85b538584b03c200579fda78138abb7402709','c8a04b35d972d23e179abfb326017c347d006cc7b808911cf5142cf5064133e5','2d9457d17422d14f6a83470d6d2bc850ec4c6026d84fa3466613ea0cc46f9a2d','92bff513609b1605d334d2217df4fa65629a71c0ef21f300d9b9c140058a2c04','992c7c3ed01785f5ee158c47778114f6c5173c1e3d5a5cb9716a087ef20d8c84','ed0e5d8b23970bc3b18934c444416376e8cbdf45b2ca89882e8b75458909a349','5bf3a25a7648d80b851fedf3c8135c4d0fb37072f13a4a6c435534ff536d186c','495c9f867f2e8d561cd8005091ec465205c4eff772b5b0d01bbed5a78a00ec1f','2215d658da1f13a7fc9631fc4f640bfb8b75936e149014602081279da3bd8358','0f96b96de79f7d6089d94eb59a2095aa589e501c76e42cdb5594f24b44071077','72a94ca95c1a1ffbce0107194ab7b567e655cea4be896dd567ce7f9edec3174e','1a4df7a500e2f80e3c19d16333065e9d52ce2026a31fb462f7e75668540969e5','92a59d430e2e6bd23994714c2a1258085537e963dec46c4aa28b70ea78a4ef4e','d6096b40f9f90d4e63a0e2c15f3410859f312cb289ad8884cbe4aa7cab6d49f7','52d95d5e7bda6380db7dabe0fdda7018ef65d3c649521acfcfe3ea4daadc2660','9bb823a53ef6edcb95fcbacee3aadec7a017b02c80e3a0251ca753b48bbad7b2','81859253519bc487b16e74686333054d339df392ced00230c127349c73d9d8b8','aed24305b26f20d73c613e0358bd5fd32c1e99c93ccadc7b95a9f8bd9bad33e5','e1449018af9cb750f7b41b6e4c7d50ca2afe942235199891296817a6ecb9024c','5692143b0a5097df28840c039587218fdb9bb8bde9088b950d47d2dee6a4b244','1e9915fcd41113a370db00e22650678dabb115603aacf111be425a1098666e55','7785e4a815775b8dbf1f38bda952b771e9c1d0ff175fbc3b7b152c73f2518050','5df34a525b7b521d41e35e0179b9f6c61f21b2ac4f32154563ed55bf7d24b673','4100119fae903c4d8741c4a06c969a412932fe349eeb1207431ba592607579c2','ba890576d6ac26584a0b098aa844b56ceafeeac753ce93fea417521d276d9bc2','e126bf5806128cbdf053be725e001b3a9300476efb8fddd63f4cc057c8353fc8','4ea606be4e6ca713a715877d9b812b9b082d5da395102ec52d44cb24d071ccb8','298f015a4b8c0b221ab311f8f5c9ef9a085b02140f0a4cae4278b0e10197c886','2b3933ff117df9143fc30cbcc1ce82eff389c0e3a2062500c2d9f76ae269b4ec','1bc6e939e8822e5488c18ddcab30b3450cc435070a30b8135633fab3d6088241','b5c4eee503579a140c7eb772242939083671585172801142686311738e3079ae','128c1096a039078d0bcc2524099756a391896215b45d9135ee8539371fd8b77d','65b827dde55c3c8a1fcb7445105436257012feb67a74b519bb2c009f1f57f4cf','ed1fabaa7641fac4329971b300d500c0a59621930f4fc170ce80b123c9547a0b','36126a42f17a71bc0b8da050afafd6352108d899ed8f1b61e70458cd81532e3f','47473b62b279bc83f6ddf9ca28cae44603c469a1236ab637770213bec12a1090','89f087e0f8c92c7d4bd0fecfdbcc7e00b59125a1eb49f096f77c5eb458043497','f0db7ab80178010e07d880a1948b3d90a065d467690faf7b777445a28b4dfac2','328749b52ab4f8295e648a4ba387f3173fb77b59e12927820cd091cf20a7b903','fc534ca2dfa7fdc7fbc63f0fa83d46daa2b63b706712afc489816ca7803edf03','2085c669bd3c860fcd211fdd476a740c86db753b9913b3647f000297abe55345','abd20f76cc5d0cc424fc5d015140e7cc46cfa5d8cfce5361e7ffd360562830f5','e1666231e455fc8a8e64a6c1514da2feda0b4388b940067fc56d939d0360d684','4018055db8430f0f8cf5fca0b04ba42fc639e930da7256708a28d15a5884d46b','2b5c20a430d53ed14bb568b2c330035a081e825c3c6869a241ec54868734c9fa','6109d326130db01f2d1243751922f5760f0558079d28d42f341a9ba64a9fe53d','6034f7066e49115aa1f6fa6d4f6981e83901973257ccf5f4b8aff9c3c2f1664f','8af76c33e4a29d970958afad9f1f1a8536d32ce5f5a860e6b33be53e4f0dc5fe','4c89087e9c5a7a80ccea71ad7a20f7c3d101e481e91ba23b642e713128b4202f','920297aaa65689f275d3463c7ae377a689aa11d62be51d337a42275e0852fcef','75268c1859cea09f45513d8ffcf66c6195718675485f2e1a0215a20c183fb59c','4910400861ca330ba08f85da7e3e5dbad348de31384eb3a7f501293a5883197c','1dc3e86b600a06633eeffb3c1a9ae455337ce72e0a126afc31cd945b72a2e525','013a9d5a9be0f9e455106ea0e2371521f49c73b8314596c04297d72efd5599b2','cdc19bd6b2d56105f1b5787fc48cd06eb6445914ce9ffd29f4188d3646ea6019','757cc5e374b80cab723c300908566252cd5397e9f3042dc4a2792b8cead2d7d3','0cd1b9a30146a5f4d556dde1102e4ed0345b8babd6e7338dcefa01e8e54148bf','7c595e101bb66a2730f9a252ccc7e022310f26e35b5c7567d3ce135241615f01','f8bab2124861dcb3885a5a59d1ab3d2c86abb486a82fb33b2f3b44e7bb06c54e','8f0b681e68410eb92d2c6e5ad0dcb433adace4711dbe368f89764f242eb88ba2','51985830096e479f1b0ef99549c913b91834e715a95f9c258d1ccca5d38d997e','410e082a678fa528a0326f1d80587b3c2382c00fd1f44fe29d8e122595d24479','23e900d58a1a2ebbc6481071ce830ef189d2499c67bb02161b4830fed76160c9','85962edd4b9c6d672ab008d5aef8beb8ceec53256fc3b5f450b06d477d73780b','84a6e3a80ac2f6193146bd2d2a1b754e49226f8fc575aeb42cf873f98aa407a0','e800ac9e83e652d2b2a48f115fdbe25ad328df4e09a05fa7c7a3a4dfb87d1bb2','841f0e9ce8c908ee124f99b072cd17abca6afef755745e62abd386726b8c326e','2ccf5311630a9b41395487dec690d5d03c9e2eb7a59012a611a13beaf11b819b','7f952b6ecd75cf3628dc96579c175d36283ee9008a099beb3e33545a8e3e7845','e1002155254523057591f4e08ef973229da13d227410a34a8fc54a1f60cc2d68','2651f67e89e7e52e10170f0231b0ddcb701f8389fc5c0fa5380223ea16c54bca','104d18c1da5fb06eace8bd3ad3c33a04ccfb0f9098ad439151207fa3d328a2bd','71df5a852f411975cb61f96177d8e85d88ed787ffd26e184a9af91d5e2ecdb00','2f1dd9aca963b7e26b99cc784e4f3b6a8efa3248076bcc48f3197b0394c3dc0c','f1bd89d17c1c06292c7be49b5de63aa370957a37fa9a35e0ee42526fcaaba719','d85d77b33f84ded1494ee582521bf6b1db91a43776a14b3b7f5b31df84ef8a36','21279b7a9a091e98187cdf6c1c7f1406de9ec0bfaae59f341ed8a12bb9962402','1f3e2fa0c43b7f9931c984bca5e672bf9a535c8ffdc333a956c3dc948b1d56fd','b550229df9a3e8df8b8b531079f4eb4cc85c201d3ff0645715ab52aa6fcd9b04','5f2f17f0ba59230034d72f0397986e4369c2435da48c3af761fbd1e2506a6485','4bc115c55ed9c3808a30aa71ac0a204d0842060688484491c9805b2ed2fc29e4','00b5303ddec67732b0231780164317e790a7d7facced796d92340f9313d45c69','767c19c0a7d3c28aa5d38642c6fffa597568069063fbb412f7b243a9333d1254','cd7732354daaf0faa0536228c7dc71fd24d9b429bfe9e58fe95e9115c6af4f9b','718ab735156e08976578d1e292b651bfe73fad72a231dceef3fd9ca486d14137','3f1272233a4b1165aeac241ddba790d72a47aeb034e5863b28da29352c76bc7e','079168f2d47367c01ea9a73021374815558639e6203c6628d70c0708e018c56e','567225737afffdd3acfc9fe99e36e9dc9d5fb41b42d34e45882ff70671a6fa93','49f01e1731c1b6fa00935df01b2c9c687bdb4656a5e25152eb84a2bb3d46cd1b','49cf07805a4e1977a57f099dfc01414437859ad01d7345ff00fe347a130aee8d','29a626be043c9f582f7705ca305027e76bf8e2a3cc5de4d91192372fcfc0c6ac','e512267ce496da12490c8104ae234eb507c8c023bb2b447b5b8f078c4155e743','c6654d8c4fabd8902f9c19d925de3e42e30d12d37404b409b83345c8b56f1a4c','31db4c3c740a594e9c6ae0d1604e7483d572e0041ace3de64b6e8a9d0c34fec0','261de3df1d13be6d3b6b4bd5996a67f1852b91018022d811c801b13e52ca4b20','c818a70bd78badccbf213528aebd1251fd788af28eb6d7bf29ce135d4a6f1773','d645939e14da6187ec359dec79a77a36a74b9b7370b604bbeb50c9c4fb8b19e4','632856f176b9f378cbe7ff9bbbcd8cce9f20dc0945019196ec18019733b800e5','a5676adce7abb4d45ecbc5a5043c93da948dfa29199d732be76603a381ab5d12','e547fa10b2be1464f0303884831d0133bb06ffa4aa9f0e17bba5689de8958080','ccef9c57ab03949a658f9063959b460de0d64e97a1add84a13a25eea818b2475','f76d865fb1c60c48d8958f4fffdcceea4653f7baa19194bd91f32855a630be1c','3a62b5cb09c925131b4e989a31d1eb6f83b1d9c5a8705c78abf9085bd18b1a81','c7de3797e6d29e1cedb3542bb0f726143dbe572750328454f7fde1d228980d04','a53e61c2f06442a5aab2d1988f9aa79c9df56da4f2125121f68c44ae9afccf8a','766d72078b3155f1b42b5812e74918f3990fea57576aa01b7f62976c46263b3c','786990437a1fd694e862512f67afdef0325168057f85002445252be2c5fd7606','67b45d41c4142b042e72723f1a038b3a321423fc818eca2534da525251808f4e','684e60b3019215f964bbd515f1dee1eb0ec4164bd8057cff63dd7b94909f0ccb','255a774634625879e720045ea552727a281c72d33e764d7e44718f490f356bbd','f639aa3fa76b2d4f1142a5743f7f932e5054a42fcfc124744bd265216ff67a7d','e27ce07e49e6f266e8e95dda2eed90335106ab6133562879c2819e6a6706cb6c','8b857d797a1bce6a3804d34a1fc8cbf34d709f62a86f8596186ea6bd10cf2cf8','1ba19830b3e1357a5d0de818fbd5771f8adf2d6c8e2a50a6efea0fd912c124fd','b138bf32bbdedbf9f2209bb12ceefbc7c28351874baf27d176ee107570a55882','758e96402cf60560733c50592acfaa5ecc934ed69bcb2800695ac497f3836976','817848bdecea23d24fc6136a28f8ed264197e1942c50eebeb4090fbedf86bea5','8e138bbb476372397c9859bf7afd2e0f69895ee067b1a06c88d57734218fd5cb','15805dabd7eac93712ae4f8e4a63c1a0fb2a3c831a089eaa30497ab8666ce396','8a6d8a8d59f8726cdefd1163c838fb9e92dcc6a796d8854b1c3f2b75fb8a7e20','04a96ad1f8439ea8f9d874dad780f941c14e6b5144ba416160c82469598a8e6a','c995d4f43230d0b71ce265def3e155878bb8815be8d00a89f22f8a1a698196c4','bb799cecf9656170f20e282d2e202a88918e2b0393c40ec91c8cc8c9dfe20fa7','a45087bf548e7af593847b70c6cba1c23f901a8f81f99d4348bfae9e83d58365','4224f3e17c258b5d55c96b985c726c9e7b8ec8ad12f42a7f6b5e775d9539b9d2','3a4cdad11e8f8b09441bf8cc61ceded88432007aee3f3a1f1fd02cc8f25e0bb9','0c76c8900cdbb7c196dab0cf8bd63aabf4e5f1d45b2f503f867736a3a76d0601','b447e90b5274f745cdaab02b51210e7aed6013b829fa57f8a138fdd45dd212f7','3e9be918c8e390b23a6ed7007a7de14cd87fcae22c50e275126fbac311af8068','3fc6a2ca2d3f5329d9ff0a755b689c5ecddb35bde88933fd63f048598c844aa5','1aedcca6510ecc342408fa497eb7a9bb822217f80c30c50c6ce548b12b60e36f','0456ff1790245f6ddc85efb334a577e1500010aa5db1d12a7c15278d62b02124','1490ba0aeae3caa9045a87ceb68dabab8449b35d792a304254e3b5948ebdb7a5','f1d01d1b8a0c173ed2f5249bb859b9860d7a44825cb69495b4b02ac2e233e2c1','75d40c2a7c7c66829441102f72bb1a978724c4ddef0d5392f8f3d15728932d13','0c5ecf0290541d52b3290be6d1595912e020d531813bf468da2f74ae54097aab','8314b8e438758e787169f06000db5576777bd03ff680c2261f2bc95cf6d11981','cdce2c1c5a9213641b0c68891d3a65facdbb017f2aa33c4552ebb12db065b999','f2dc36666a60bc575e2ba82520f7ac7a8588466eba64e76a2573da6eccc233b3','c31ac455a0bc3557ce41241fd2edc604c74fb3e1cd2574f6d0689b7e034b1b95','83d47d6cfd4d8461c203d08dd96179d72693956a662e178fb08b04a5d99f0ff3','556aae7eb08d0ac622996cceb8a474653013154a37f38cf1b635118f7825c0eb','90755ddc07b29bf276ad3bad100a997d3c4ca296056b9010f1308362ac81d123','a6a82ec578053dd75389f3467c877447ef2eef8e8197f7558507a8604c94cc14','795165e353ba00c504be42990608bd2972725a4b116304664df733a5850f70ae','83cdf072c28a07f7794f230a9338b50ef374f35a4573612f39da002096c32055','4bca42bb3683272c2727863cfc3c253a0a82e224a8480b993ffb704ab3468323','69295e8a992ba9dd7a418996bc998298485e0c70bf2afa9cf6c60ce2056635e1','8f9db1e1da5cbfc97b42e223815a83a6f6805018099ee0b67a908709f51b04c3','9e5a4cd24447cdadc60bbf5a4ee26fb1b0b53383c2347f3cec12fea49212faa0','526896053f289cb1ffd8c39dc46400607dab9a2d6036be9bc350c8322dcb9be1','5687f7a58e5e4e9ab6ecf1d567312a204faff47c6bd704a5e05abb471250cc6e','accd04a44c0cb36b3d99b18228a63c51af30bb748afd224a5db743668545dfd2','00a7c2a13cb2e54d6beb5966da961b67875ec604f236036b0e3c625b110e3656','bf65c3820d067928441919661e4cb133e485b440319e2c70c25d0191651ccd57','0402fae34ba97909ff04ee85c5cc5b3f6853597292f015f36dea62c0c3935699','e2d3f6bea22248e5510e4015c2c60b77382e6c902e616f25c38c3ad18845bc13','f8fe39f4d7b8bd599227020a936f5a2eaf8c7dfacbf0bb1ddd52ae9f562e9512','25d6ebc89e91217c0cca21b60f5d6287a62803972773c4bd569ccab6676b62f6','47f1c6d67e221f6ccafc15570ef768bd5b6de16c558e8d5cbfaf80955f743ade','cb286f6101335ab2f4a8aa02e2f5983d237f6f4c5c74ef6f9e07583d3253f9f1','338c0a5455d48044353ec16dc9762f62e80d5fb9bca4604458e5e162045fa049','ca37a05980178b05822556f902be915cc0fefd9573240027406e9ba2856d3b8e','2b715854b64c9c0a00a39e4fd74eaf335cf096bd793ce206b2bc125f2c54a606','23da12bdefc17254c12fcbd1bb73896b69cd4e8e0c9c67e4ce22f0583046ccab','9c62aa949348c2cbf0cbcbab83836bddc8cb280fec7234fdea5bef2e11d47353','d2aa706ef77eaf6a4a2b85c69e082d8fe1d66e60baab5363cb863eacd48f18ac','ebc544ca1f3e130eb3d93e350fee53bdc87adf5cc5ceffe7c1022a15edc60054','94eb863a95134e273e01baa152701cba2002d5b91bec4504a170d334975f0673','e5457f9d3c7b63d3b443cfb8eb4d9986dc86297067989700076b0349e0030e19','7b0198c6c34e68c60146d15a1aff34f166d9133f3e9f3a351d582280a88cb72b','4385dd5ecfb76320839baf5cbef471f0f7b04d7e85864d6655020712fc315044','117dc9b63b5992154c6d915bb920691d4b8b12dd4a665125703a2adf6380db6b','50ebf0f81bdcbf9db422af1fe4918f0183a290f052b4e8a34615b7431d9c9f25','2c5fa31ca8293eef45ca66bcb66db3b0963e298bfe0713574a4aca51aefe05ef','3899366606314fe554abec1c9df878e83a9c86c01a0324b897e4f84cb9763e2d','43e47636965bb4271a11bf8ed1407cdbaa8b3be917bb646fbd4e2ad6391391fa','28bad2bbaa3fa4e4c337dfdb2da7af14152332dd0667e9e506afab4e5b4bbca7','ef07efc2c28541d8cfba197797eabc05abfc852d16f84b68682aac0f08fae862','3045944dda59e910aecf4bb30dd6ba5df90559c48c07182e65d287a87cc3a33d','2296cef01f83d305f3ab2d36056657b94c13fa73fa1feeee5a4828971406e285','544dc338fb6cc13ecdec7e0ac4b59d25d37107d2f5b7cab5ffceb9c77a4b15f1','580846cefc7045f558044d4f068ab373a68e5eaa0bfa1280577b40e8afb3b88d','68c3c3907d4b078fa4274ac61d89bfbbd9a64b6752b5e833e9d31056fdddd0c1','daedf3895d5bc6eb2923a9a2735a85f892da3b50d50f23d6052e4ca07b426b36','e98b18a473bab6f1bc0c990b82bb436aca1e2ffe5854acb4cbe277e50555de2e','456fd29ed1963119deb3945143ec781782c271e8f68531b9d902c9032c69ae49','90dbb1f84f8f16e5f14d0f2328ad88bb83bcbc640fd3fcacc5f10d286858281c','ecad028f0cbea08fde16c0455c809791cb4cef077cb222477b296bb9aa610736','ca9f8c377974fcafe63a525568fd9fa3fcc223988b9725ac97666e0c0ce4a5b1','e006b2394320e4e75bb9de36328e479dc53290f959f80e6cbb92584b4bd2cb4d','08aeb4fa67382d940431d971160e4a0b2585d3fc0a292c4db15f8597608ad636','746779cdac3e9f31a93975fcd77865393237fb04ebc95d59c9c60aca59461623','3d55ce1c5de8a4cea88ef2ca11eb6608bbdbb4614626fe14e411dde10e95dc8c','2e7a6f01bc51b894abdb42640d2d3ecb303326884aee4dca3ba9d5fac7982e26','8988fdd814c5f2194ef9632806fed057fc951e6e3819b835e822cc2bedad2ee6','9770a7ce740795b4d8c5d6e3215084e824d0a0d56a8610c58e84d9f0cf985f25','dff0fda83203a4d153e3cba14ce4acbb03ad10955b4b624a617642d239b7eccc','5b7ffae87f19194f13ac3b677f862a68dda0990963a67b516cb35c0073f8e4a0','619b0430bfcfd32879d39e1af895734602237abed4a8b9fda02bb46025381564','34fbc910860bf7140f6af138333f9c66f4611355a7bd3d068c7fdf6071648f35','1691a6485b64017783d9e080aa9fd4749b0c989f961326f6cc8be2b857c8c50e','4f3f90d8134d1f4399b75731f587a3cc7a6f66bcfcc2093de1ebdd86b206a19e','0954e21e122968a8d74f0121fc3964816704403e72151a0b96c5d488ef3881f7','74e49c8ffaafffc1bcd3185630cf1565265040f6b3eb3f15b24c8119693ce18c','5006cbe869822309b0dbd04ef918669b8346280d29bdb4ae16380ee4c72ceff5','e08dfdd7123ebed3aa92bd38212a840cda8064f303d2e1b43b8d3719334685b2','6ce81b348a623678efa2c5a8675d986a3a2bf97c75aec4abebc00e19e8e86dc2','8c9db22bd7c17b7c214fbd1a4116a4e9932fbb6d967922f134cc3dccfeb3bbc1','8d10837cee45303c8c7f465637a3004e2f97b3f4f2df603c90d8cbe5388d163c','702444149304ba4dee6da49da4f2b4e773b956334f7714612fac0faf273aa2c5','d1f93e701230ae1e0e3aa4e411c8cf6bd336f33cf45dac1fb86ccad4f42dda86','15635b03f4cabcefeed0c7517ae6bbc6f7eefddd024d0b1eb1af5d496a048204','c2f10c406dfab3541a33c9a2e0b36d4b8310b7189ba993895a93be740e059a43','c24a21a9d38f7410b89771b3014d0a17d81d866f791141940bf9fb760ab79e2d','9539a475b322d48205b78a6a594bb259bbb5b917567a3e9c14f2f7a189ac5c8a','8b949a0a01c2bbd5cef387922eb84520f654f885ab0c622f96ef843443f4597e','8feceee3a871810576d9dd09c4666c04b7eb5a7a133c385887d8fb62421354db','3a8b2fb778f41dd3bf0991e724681c6bef2c512824e1708c34193253c51b4d30','497a5d5fbb80ad3dcc511ec35d4371e2d816ce42403686b10f55be52f5f47df0','274d08e3459a9cbd483c6f4c85abc3d0c9a984fe603b5f283b8c9a70053d5b56','88f12af0c6f79fcc0ae95af86430610500ea95827263415d9f9814084c966497','eb70fbd55e1ea9d3e16c8e46188aad1ffed5ffe284b935d92c4226bfaa8704f2','e7b2fbac891f35a8b53e8171e229b395096b80462aa581299f5798607f60e484','7fded11a5b6e1190d8734506646a83c6066e044575c3305aa3465136c6b1e666','a5332f5a4c9cbe0aea66191b6fa05ec6ab9fc9db65e26796e26619d4553dc917','1caa9119f28b8ad64e7cbe28e5666eb911e32461bc73be106e1b717b64fdaa10','e96bffd81325a1233172996f87a3ebe195cfaacf172c920822954b6abdc95f56','8c6042771edaff87cf8218d18741cad0deabfc760b6bc64b6909a996e6e74001','7f88f85c100189209f6ea52ce87c0170d100d0a960183d9b4d19184780ed9047','a9b2d67f784a165580bf53402144f0d1c9b2fe4e08dd53f1deb1d5969daed1ba','286ca9b26c102d71c0b46ee3869b0852d42b212c3b17b9e1489016d0019b4c8d','1db7e308aeb8adf179dc42f5f050e17e4f31888643065ca79d33cd66044263ef','5a58fb4f276a81f6a65ad398e2645c364cc8889044c005118364f964c0a67e1e','b2f94355ea872e7bb34ee032ec299767cacd195e8bfb969a7594ce0b335011d6','59914d9e7c58fa65e2f3cfd65d455971cd7458814d21d4bb49826db112cced57','65592fa69451fd6944b4d045caf883d18d4b9db8f3c5344df433798cdd3db028','ba9ec85e886b525a02a504a681569e898789f1d6aaa7c4c5d4fbb5e2d168088a','271251dfea530c221ee95c9ef15b15b2a95fe6592c9ada52cb43804e2cc9eda7','292da214129249d8bc4b974728e486906b6e648c95b5b88e504d2e4ca10008a6','26fcf3f597084a8e61cac2094e767e1cd573ed8c9e28dc650e9af27a5aae9038','812699632437a267c0d03f6c7166facc9e1344346931bf9f18a90e24cea0155c','0b8104585f34093701af39d546266e862e78fbbcfead8fc83e2ee0e463219fa3','fe1ff7e0156f457d2114ba8d9d994c3d5cafa597e92fc4684e8b9da6c670b81b','97dcdf28c0b698b03ba81c004248e240dd0eafde72dfc59f7df5f359f47ba9e5','8dc22cfec8be8114d3b3bf8a052eed07c4eacfab6695c173b2b87f2207965665','69e40e786d4a546d2f8a62277a9d217d297b5811f174bf4a88af0b6ac878ce8f','7f1d9164196e0c4ee2074b60cb9b42c368665198b7d0b2d5cb99cc24a1516c7a','0aecda7204e9ea6ae00a7ad616d18b7ad355be7127b6ce231e6b7a0231916f48','698867e6d2b992463cee23185196d2cadaff1f7d3eee5700ef2ae74f4afed976'];
 function checkGift(code){
@@ -431,7 +458,7 @@ function checkGift(code){
 function verifyLicense(email){
   return fetch(VERIFY_URL, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({app: APP_KEY, email: email})})
     .then(function(r){ return r.json(); })
-    .then(function(j){ if(j && j.ok) return !!j.valid; throw new Error('check failed'); });
+    .then(function(j){ if(j && j.ok) return j; throw new Error('check failed'); });
 }
 /* GoatCounter (account created 11-23, login in ~/.secrets/goatcounter.txt on the server). count.js sends path+query, never the #hash, so family names in share links stay private. */
 var GC_CODE = 'familyformals';
@@ -839,13 +866,18 @@ function renderPro(){
   if(!isPro()){
     var url = buyUrl();
     h += '<ul class="feat"><li>Your studio name and logo on the printed call cards</li><li>A link with your studio name for every couple, so they fill in their family before the day</li><li>Every wedding saved on this device, one click to switch</li><li>No QR code or free-version footer on your cards, just one small credit line under your studio name</li></ul>'
-      + (url ? '<p style="margin:22px 0 6px"><a class="btn primary" data-buy="1" href="'+esc(url)+'" target="_blank" rel="noopener">Get Pro, '+PRICE+' once</a></p><p style="margin:0;font-size:15px">One payment, no subscription. 30-day refund: just reply to your receipt.</p>'
-             : '<p class="notice" style="margin-top:20px">Pro goes on sale in a few days. Everything else works now.</p>')
+      + '<div class="plans">' + ['year', 'pack5', 'lifetime'].filter(function(k){ return k !== 'lifetime' || FOUNDING_OPEN; }).map(function(k){ var P = PLANS[k];
+          return '<div class="plan' + (k === 'year' ? ' best' : '') + '"><b>' + P.name + '</b><span class="pp">' + P.price + '</span><span class="ps">' + P.sub + '</span>'
+            + '<a class="btn' + (k === 'year' ? ' primary' : '') + '" data-buy="1" data-plan="' + k + '" href="' + esc(buyUrl(k)) + '" target="_blank" rel="noopener">' + (k === 'year' ? 'Start 14 days free' : 'Get ' + P.name) + '</a></div>'; }).join('') + '</div>'
+      + '<p style="margin:8px 0 0;font-size:15px">30-day refund on every plan: just reply to your receipt.</p>'
       + '<div class="row" style="margin-top:18px"><div><label for="licKey">Already bought? Enter the email you paid with, or your gift code</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@studio.com or GIFT-CODE"></div><div class="shrink"><button type="button" id="btnLic">Unlock Pro</button></div></div>'
       + '<p class="note" id="licNote" aria-live="polite"></p>';
   } else {
     var w = getWeddings();
-    h += '<p style="margin:0 0 14px;font-weight:600">Pro is unlocked on this device. Thank you.</p>'
+    h += '<p style="margin:0 0 14px;font-weight:600">Pro is unlocked on this device. Thank you.'
+      + (PRO.kind === 'pack5' ? ' <span style="font-weight:400">5-wedding pack: ' + Math.max(0, packLeft()) + ' of 5 left.' + (packLeft() <= 0 ? ' <a href="' + esc(buyUrl('year')) + '" target="_blank" rel="noopener" data-buy="1" data-plan="year">Go unlimited, $99 a year</a> or <a href="' + esc(buyUrl('pack5')) + '" target="_blank" rel="noopener" data-buy="1" data-plan="pack5">another pack</a>.' : '') + '</span>'
+         : PRO.kind === 'year' ? ' <span style="font-weight:400">Studio plan' + (PRO.until ? ', paid until ' + esc(String(PRO.until).slice(0, 10)) : '') + '.</span>' : '')
+      + '</p>'
       + '<div class="row"><div><label for="studioIn">Studio name</label><input type="text" id="studioIn" value="'+esc(PRO.studio)+'" autocomplete="off"></div>'
       + '<div><label for="logoIn">Logo for the printed cards</label><input type="file" id="logoIn" accept="image/*"></div></div>'
       + (PRO.logo ? '<p class="studio-row"><img src="'+PRO.logo+'" alt="Your logo"><button type="button" class="small" id="btnLogoDel">Remove logo</button></p>' : '')
@@ -916,9 +948,9 @@ function nudge(msg){
   track('pro-view');
   var url = buyUrl(), n = $('proNudge');
   n.hidden = false;
-  n.innerHTML = '<b>Photographers:</b> ' + esc(msg) + ' <a href="#proSection">See Pro</a>' + (url ? ' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">'+PRICE+' once</a>' : '');
+  n.innerHTML = '<b>Photographers:</b> ' + esc(msg) + ' <a href="#proSection">See Pro: 14 days free</a>';
 }
-$('btnPrint').addEventListener('click', function(){ renderSheet(); track('export-print'); window.print(); nudge('put your studio name and logo on these cards.'); });
+$('btnPrint').addEventListener('click', function(){ usePack(); renderSheet(); track('export-print'); window.print(); nudge('put your studio name and logo on these cards.'); });
 /* The couple sends the finished list to their photographer, who is the one Pro is for. Phone: the system share sheet; otherwise copy. */
 $('btnPhotog').addEventListener('click', function(){
   var rows = runSheet();
@@ -988,14 +1020,14 @@ document.addEventListener('click', function(e){
     if(k.indexOf('@') < 0){
       checkGift(k).then(function(ok){
         t.disabled = false;
-        if(ok){ PRO.key = 'gift:' + k.toUpperCase().replace(/\s+/g,''); savePro(); track('pro-unlocked-gift'); renderAll(); say('Pro unlocked'); }
+        if(ok){ PRO.key = 'gift:' + k.toUpperCase().replace(/\s+/g,''); PRO.kind = 'lifetime'; savePro(); track('pro-unlocked-gift'); renderAll(); say('Pro unlocked'); }
         else $('licNote').textContent = 'That gift code was not recognised. Check the spelling, or enter the email you paid with.';
       });
       return;
     }
-    verifyLicense(k.toLowerCase()).then(function(ok){
+    verifyLicense(k.toLowerCase()).then(function(j){
       t.disabled = false;
-      if(ok){ PRO.key = k.toLowerCase(); savePro(); track('pro-unlocked'); renderAll(); say('Pro unlocked'); }
+      if(j.valid){ PRO.key = k.toLowerCase(); PRO.kind = j.kind || 'lifetime'; PRO.until = j.until || ''; PRO.checked = Date.now(); savePro(); track('pro-unlocked'); track('pro-unlocked-' + PRO.kind); renderAll(); say('Pro unlocked'); }
       else $('licNote').textContent = 'No Pro purchase found for that email. Use the email from your Whop receipt; if it still fails, reply to the receipt and we will sort it out.';
     }, function(){ t.disabled = false; $('licNote').textContent = 'Could not check right now. Check your internet connection and try again in a minute.'; });
     return;
@@ -1041,6 +1073,21 @@ document.addEventListener('change', function(e){
 
 /* ---------- boot ---------- */
 load(); loadPro(); affCode();
+(function(){
+  var DAY = 864e5;
+  if(PRO.key && PRO.kind === 'year' && PRO.key.indexOf('@') > 0 && Date.now() - (PRO.checked || 0) > 30 * DAY){
+    verifyLicense(PRO.key).then(function(j){
+      if(j.valid){ PRO.kind = j.kind || PRO.kind; PRO.until = j.until || ''; PRO.checked = Date.now(); savePro(); }
+      else { PRO.key = ''; PRO.kind = ''; savePro(); track('pro-lapsed'); renderAll(); say('Your Studio plan has ended. Renew to keep Pro.'); }
+    }, function(){ if(Date.now() - (PRO.checked || 0) > 44 * DAY){ PRO.key = ''; savePro(); renderAll(); } });
+  }
+  try{
+    fetch('https://api.whop.com/api/v1/variants?product_ids=prod_ufUFnckIeVvR3').then(function(r){ return r.json(); }).then(function(j){
+      var ids = ((j && j.data) || []).map(function(v){ return v.id; });
+      if(ids.length && ids.indexOf(PLANS.lifetime.plan) < 0){ FOUNDING_OPEN = false; renderAll(); }
+    }, function(){});
+  }catch(e){}
+})();
 if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://'+GC_CODE+'.goatcounter.com/count'); document.head.appendChild(gs); }
 (function(){
   var q = new URLSearchParams(location.search);
@@ -1052,7 +1099,7 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
   if(q.get('bought')==='1' && !isPro()){
     setTimeout(function(){
       var ln = $('licNote'), lk = $('licKey');
-      if(ln) ln.textContent = 'Thanks for buying Pro. Enter the email you just paid with and press Unlock Pro.';
+      if(ln) ln.textContent = 'Thanks! Enter the email you just used on Whop and press Unlock Pro.';
       var ps = $('proSection'); if(ps) ps.scrollIntoView();
       if(lk) lk.focus();
     }, 400);
@@ -1060,11 +1107,11 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
   if(!isPro() && (q.get('for')==='pro' || q.get('a'))){
     var url = buyUrl();
     $('proHero').hidden = false;
-    $('proHeroCta').innerHTML = (url ?'<a href="'+esc(url)+'" target="_blank" rel="noopener" data-buy="1">Get Pro, '+PRICE+' once</a>' : '<a href="#proSection">About Pro</a>');
+    $('proHeroCta').innerHTML = '<a href="#proSection">See Pro: 14 days free</a>';
   }
 })();
 document.addEventListener('click', function(e){
-  var a = e.target.closest('a[data-buy]'); if(a) track('buy-click');
+  var a = e.target.closest('a[data-buy]'); if(a){ track('buy-click'); if(a.dataset.plan) track('buy-' + a.dataset.plan); }
   if(e.target.id==='btnHeroExample') $('btnExample').click();
 });
 readHash().then(function(o){
@@ -1079,8 +1126,8 @@ readHash().then(function(o){
       n.hidden = false; n.className = 'notice photog';
       n.innerHTML = '<p style="margin:0 0 8px"><b>' + esc(nameA()) + ' &amp; ' + esc(nameB()) + ' sent you their family photo list.</b> '
         + rows.length + ' photos, done by about ' + clock(rows.length) + '. Scroll down for every photo: who steps in, who steps out, who can leave.</p>'
-        + '<p style="margin:0 0 12px">Photographers: send every couple a link with your studio name, and the call cards they print carry your logo. Pro is ' + PRICE + ' once.</p>'
-        + '<p style="margin:0">' + (url ? '<a class="btn primary" data-buy="1" href="' + esc(url) + '" target="_blank" rel="noopener">Get Pro, ' + PRICE + ' once</a> ' : '') + '<a class="btn" href="#proSection">What Pro does</a></p>';
+        + '<p style="margin:0 0 12px">Photographers: send every couple a link with your studio name, and the call cards they print carry your logo. Pro is $99 a year with 14 days free, or $39 for 5 weddings.</p>'
+        + '<p style="margin:0">' + '<a class="btn primary" href="#proSection">See Pro: 14 days free</a> ' + '<a class="btn" href="#proSection">What Pro does</a></p>';
       /* first thing they see: in the hero, in place of the couple's "see an example / start" buttons */
       var hero = document.querySelector('.hero > div'), cta = hero && hero.querySelector('.cta');
       if(cta){ hero.insertBefore(n, cta); cta.style.display = 'none'; var pf = hero.querySelector('.facts'); if(pf) pf.style.display = 'none'; }

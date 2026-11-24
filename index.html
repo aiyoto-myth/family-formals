@@ -332,7 +332,7 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
       <p class="chap-sub">Hand this to the relative calling names. Every photo says who steps in, who steps out, and who is free to go.</p></div>
     <div class="row" style="max-width:520px">
       <div><label for="startTime">Photos start at</label><input type="time" id="startTime" value="16:00"></div>
-      <div><label for="perShot">Minutes per photo</label><input type="number" id="perShot" min="0.5" max="10" step="0.5" value="1.5"></div>
+      <div><label for="perShot">Minutes per photo</label><input type="number" id="perShot" min="0.5" max="10" step="0.5" value="2"></div>
     </div>
     <div class="stats" id="summary" aria-live="polite"></div>
     <div class="film"><div id="sheet"></div></div>
@@ -365,7 +365,7 @@ footer{padding:36px 0 60px;border-top:1.5px solid var(--line);font-size:15px;dis
       <div><h3>What order should wedding family photos go in?</h3>
       <p>Start with the biggest group and take people away, so each person is done as early as possible and can go and enjoy the party. Finish one family before starting the other, so people are not called back. Grandparents, small children and anyone leaving early should be finished first. The planner works this order out for you and shows, for every photo, who steps in, who steps out and who is free to go.</p></div>
       <div><h3>How long do wedding family photos take?</h3>
-      <p>Plan about one to two minutes per photo once everyone is there. Fifteen photos take roughly 20 to 30 minutes. Set your start time and minutes per photo and the planner shows when you will be done.</p></div>
+      <p>Plan about two minutes per photo once everyone is there; photographers who publish their numbers mostly allow two to three. Fifteen photos take roughly 30 to 45 minutes. Set your start time and minutes per photo and the planner shows when you will be done.</p></div>
       <div><h3>How do you handle divorced parents in wedding photos?</h3>
       <p>Add both parents, then keep them apart. The planner never puts them in the same photo; every group they would both be in is split into one photo with each of them, and a new partner can stand with the parent they came with.</p></div>
       <div><h3>Who should call out names during family photos?</h3>
@@ -484,7 +484,7 @@ function track(name, tries){
 function getWeddings(){ try{ return JSON.parse(localStorage.getItem('ffp.weddings')||'[]'); }catch(e){ return []; } }
 function setWeddings(w){ try{ localStorage.setItem('ffp.weddings', JSON.stringify(w)); return true; }catch(e){ return false; } }
 
-function blank(){ return {v:1, a:'', b:'', people:[], apart:[], shots:[], disabled:{}, known:{}, start:'16:00', per:1.5, seq:1, studio:''}; }
+function blank(){ return {v:1, a:'', b:'', people:[], apart:[], shots:[], disabled:{}, known:{}, start:'16:00', per:2, seq:1, studio:''}; }
 var S = blank();
 
 function uid(p){ S.seq = (S.seq||1) + 1; return p + S.seq.toString(36); }
@@ -658,7 +658,7 @@ function runSheet(){
   return rows;
 }
 function clock(k){
-  var t = (S.start||'16:00').split(':'), m = (+t[0]||0)*60 + (+t[1]||0) + k*(+S.per||1.5);
+  var t = (S.start||'16:00').split(':'), m = (+t[0]||0)*60 + (+t[1]||0) + k*(+S.per||2);
   m = Math.round(m) % 1440; var h = Math.floor(m/60), mm = m%60, ap = h>=12?'PM':'AM', h12 = h%12||12;
   return h12 + ':' + (mm<10?'0':'') + mm + ' ' + ap;
 }
@@ -817,7 +817,7 @@ function renderSheet(){
     return;
   }
   var moves = 0; rows.forEach(function(r,k){ if(k>0) moves += r.inn.length + r.out.length; });
-  var mins = rows.length * (+S.per||1.5);
+  var mins = rows.length * (+S.per||2);
   $('summary').innerHTML = '<div><b>'+rows.length+'</b><span>photos</span></div><div><b>'+Math.round(mins)+'</b><span>minutes</span></div><div><b>'+clock(rows.length)+'</b><span>done by</span></div><div><b>'+moves+'</b><span>walk-ons and walk-offs</span></div>';
   $('sheet').innerHTML = rows.map(function(r){
     return '<article class="pcard" style="animation-delay:'+(Math.min(r.k,12)*35)+'ms">'
@@ -851,7 +851,7 @@ function renderSheet(){
 function renderAll(){
   renderHero();
   $('nameA').value = S.a; $('nameB').value = S.b;
-  $('startTime').value = S.start || '16:00'; $('perShot').value = S.per || 1.5;
+  $('startTime').value = S.start || '16:00'; $('perShot').value = S.per || 2;
   renderSides(); renderApart(); renderShots(); renderSheet(); renderPro();
   var st = $('studioNote');
   if(S.studio && !isPro()){ st.hidden = false; st.textContent = S.studio + ' asked you to fill this in. Add your family below, then press "Send back to ' + S.studio + '" under the photo list.'; }
@@ -926,7 +926,7 @@ document.addEventListener('keydown', function(e){
 $('nameA').addEventListener('input', function(){ S.a = this.value; rebuild(); save(); renderSides(); renderApart(); renderShots(); renderSheet(); });
 $('nameB').addEventListener('input', function(){ S.b = this.value; rebuild(); save(); renderSides(); renderApart(); renderShots(); renderSheet(); });
 $('startTime').addEventListener('input', function(){ S.start = this.value; save(); renderSheet(); });
-$('perShot').addEventListener('input', function(){ S.per = Math.max(0.5, +this.value||1.5); save(); renderSheet(); });
+$('perShot').addEventListener('input', function(){ S.per = Math.max(0.5, +this.value||2); save(); renderSheet(); });
 $('btnApart').addEventListener('click', function(){
   var a = $('apartA').value, b = $('apartB').value;
   if(!a || !b || a===b){ say('Choose two different people'); return; }
